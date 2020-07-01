@@ -7,4 +7,18 @@
         android:orderInCategory="100"
         android:title="@string/action_settings"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/action_favorite"
+        android:orderInCategory="100"
+        android:title="@string/action_favorite"
+        app:showAsAction="never" />
+
+
+    <!-- not add menu-->
+    <item
+        android:id="@+id/action_none"
+        android:orderInCategory="100"
+        android:title="@string/action_none"
+        app:showAsAction="never" />
+
 </menu>
