@@ -40,7 +40,7 @@
             android:textAlignment="center"
             android:gravity="center"
             android:textSize="15sp"
-            android:textColor="#ffffff"
+            android:textColor="#999999"
             app:layout_constraintRight_toLeftOf="@id/btn_search"
             app:layout_constraintBottom_toBottomOf="parent"
             >
@@ -65,6 +65,11 @@
        app:layout_constraintBottom_toBottomOf="parent"
        >
 
+       <WebView
+           android:layout_width="match_parent"
+           android:layout_height="match_parent"
+           android:id="@+id/my_webview"
+           ></WebView>
        <!-- 데이터 없음 -->
        <androidx.constraintlayout.widget.ConstraintLayout
            android:id="@+id/cl_no_data"
