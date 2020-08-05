@@ -6,6 +6,7 @@ import android.view.View
 import android.webkit.WebViewClient
 import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -19,6 +20,7 @@ import org.jsoup.select.Elements
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.lang.Exception
 
 
 class MainActivity : AppCompatActivity() {
@@ -26,9 +28,13 @@ class MainActivity : AppCompatActivity() {
         const val TAG = "MainActivity"
     }
 
+    private val nBlog_img_tag = "div.se-module.se-module-image > a > img[src]" // naver blog 이미지 태그
     private val parentJob = Job()
     private val coroutineScope = CoroutineScope(Dispatchers.Main + parentJob)
+    private var ar_blogList = ArrayList<String>();
+    private var blogAdapter : BlogAdapter? = null;
 
+//    private val blogAdapter = BlogAdapter(ar_blogList);
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,18 +42,25 @@ class MainActivity : AppCompatActivity() {
         my_webview.webViewClient = WebViewClient()
 //        cl_no_data.visibility = View.INVISIBLE;
 
+        blogAdapter = BlogAdapter(ar_blogList);
+
         btn_search.setOnClickListener{
             Log.i(TAG,"Execute Search! : " + et_searchQuery.text);
             executeSearch(et_searchQuery.text.toString())
         }
 
+        val mLinearLayoutManager = LinearLayoutManager(this);
+        recycler_view.apply {
+            this.adapter = blogAdapter
+            this.layoutManager = mLinearLayoutManager
+        }
     }
 
     fun executeSearch(searchQuery : String){
 
         var searchOption = "sim";
         var page = 1;
-        cl_no_data.visibility = View.INVISIBLE;
+        cl_no_data.visibility = View.GONE;
 
         SearchRetrofit.getService().requestBlogList(query = searchQuery, st = searchOption, start = page).enqueue(object :
             Callback<ResponseBody> {
@@ -59,7 +72,6 @@ class MainActivity : AppCompatActivity() {
                 val str_res : String = response.body()?.string().toString();
 
                 coroutineScope.launch(Dispatchers.IO) {
-                    Log.d(TAG, "str_res  : ${str_res.length}" );
                     val res : Document? = Jsoup.parse(str_res)
                     val elem: Elements? = res?.select("a.sh_blog_title")
                     elem?.forEachIndexed() { index, it ->
@@ -67,28 +79,34 @@ class MainActivity : AppCompatActivity() {
                         val blog_url = parseBlogUri(it.attr("href"))
                         Log.d(TAG,"blog_url : $blog_url")
 
-                        val res_item : Document? = getImageUriFromBlog(blog_url)
-                        val elem_item : Elements? = res_item?.select("div.se-module.se-module-image > a > img[src]");
-//                        Log.d(TAG,"res_item :  ${res_item.select("div.se-module.se-module-image > a > img[src]")}")
-//                        val img_elem = getImageUriFromBlog(blog_url)
-//                        Log.d(TAG,"img_elem :$img_elem")
+                        val elem_item : Elements? = getImageUriFromBlog(blog_url);
+
                         elem_item?.forEach {
-                            Log.d(TAG,"img : ${it.attr("src")}");
+//                            Log.d(TAG,"img : ${it.attr("src")}");
+                            ar_blogList.add(it.attr("src"));
                         }
                         Log.d(TAG,"====================$index=======================")
                     }
                 }
+                blogAdapter?.notifyDataSetChanged();
             }
         })
     }
 
     @UiThread
-    private fun getImageUriFromBlog(url : String): Document? {
-        val response: Connection.Response = Jsoup.connect(url)
-            .method(Connection.Method.GET)
-            .execute()
-//        return response.parse().select("img")
-        return response.parse()
+    private fun getImageUriFromBlog(url : String): Elements? {
+        val response : Connection.Response;
+
+        try {
+            response = Jsoup.connect(url)
+                .method(Connection.Method.GET)
+                .execute()
+        }catch(e : Exception){
+            e.printStackTrace();
+            Log.e(TAG, "ERROR  : $e");
+            return null
+        }
+        return response.parse().select(nBlog_img_tag);
     }
 
     //blog.me로 끝나는 naver blog url을 blog.naver.com으로 변경해줘야함

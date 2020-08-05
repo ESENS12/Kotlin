@@ -5,6 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
+    
+    <!-- 타이틀 or toolbar 영역 -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
@@ -21,7 +23,8 @@
             android:layout_gravity="center"
             android:textColor="@android:color/white"/>
     </androidx.appcompat.widget.Toolbar>
-
+    
+    <!-- 상단 검색바 -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/cl_search"
         android:layout_width="match_parent"
@@ -55,7 +58,6 @@
             app:layout_constraintBottom_toBottomOf="parent"
             ></Button>
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 
     <!-- 콘텐츠 영역 -->
    <androidx.constraintlayout.widget.ConstraintLayout
@@ -95,17 +97,32 @@
                />
 
        </androidx.constraintlayout.widget.ConstraintLayout>
+       
+       <!-- Blog List -->
+       <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
 
-       <ListView
-           android:id="@+id/lv_searchData"
-           android:layout_width="match_parent"
-           android:layout_height="match_parent"
-           android:cacheColorHint = "#ffffff"
-           android:divider = "#000000"
-           android:dividerHeight = "1dp">
+           <androidx.recyclerview.widget.RecyclerView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/recycler_view"
+                tools:listitem="@layout/blog_listitem"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                >
+           </androidx.recyclerview.widget.RecyclerView>
+       </androidx.constraintlayout.widget.ConstraintLayout>
 
-       </ListView>
+
+<!--       <ListView-->
+<!--           android:id="@+id/lv_searchData"-->
+<!--           android:layout_width="match_parent"-->
+<!--           android:layout_height="match_parent"-->
+<!--           android:cacheColorHint = "#ffffff"-->
+<!--           android:divider = "#000000"-->
+<!--           android:dividerHeight = "1dp">-->
+<!--       </ListView>-->
 
    </androidx.constraintlayout.widget.ConstraintLayout>
 
