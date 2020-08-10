@@ -1,17 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="30dp"
+    android:background="@drawable/blog_item_bg"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
+    <TextView
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="15dp"
+        android:textColor="#000000"
+        android:text="title of the post"
+        android:fontFamily="monospace"
+        android:id="@+id/tv_title"
+        android:textSize="18sp"
+        android:ellipsize="end"
+        android:textAlignment="center"
+        android:layout_width="0dp"
+        android:maxLines="1"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintWidth_percent="0.9"
+        android:layout_height="wrap_content">
 
+    </TextView>
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_title"
+        app:layout_constrainedHeight="true"
+        android:layout_height="0dp"
+        app:layout_constraintHeight_percent="0.87"
         android:id="@+id/recycler_view_parent"
         tools:listitem="@layout/blog_listitem_img"
+
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         >
     </androidx.recyclerview.widget.RecyclerView>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

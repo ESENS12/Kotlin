@@ -1,14 +1,14 @@
 package kr.esens.searchnblogwithoutads
 
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.widget.DividerItemDecoration
+import android.view.animation.AnimationUtils
+import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import kr.esens.searchnblogwithoutads.MainActivity.Companion.TAG
+
 
 class BlogAdapter(val mContext: Context, val mData: ArrayList<BlogItem>) :
 
@@ -33,6 +33,7 @@ class BlogAdapter(val mContext: Context, val mData: ArrayList<BlogItem>) :
 
     inner class Holder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var recyclerView = itemView.findViewById<RecyclerView>(R.id.recycler_view_parent);
+        var tv_title = itemView.findViewById<TextView>(R.id.tv_title)
 //        val iv_thumbnail = itemView?.findViewById<ImageView>(R.id.iv_thumbnail)
 //        val tv_index = itemView?.findViewById<TextView>(R.id.tv_index)
 
@@ -40,22 +41,24 @@ class BlogAdapter(val mContext: Context, val mData: ArrayList<BlogItem>) :
             list: ArrayList<BlogItem>, position: Int,
             context: Context) {
 
-            blogAdapter = list.get(position).BlogImages?.let {BlogImageAdapter(context, it)};
+            blogAdapter = list[position].BlogImages?.let {BlogImageAdapter(context, it)};
             val mLinearLayoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL,false);
+
             recyclerView.apply {
                 this.adapter = blogAdapter
                 this.layoutManager = mLinearLayoutManager
-                this.addItemDecoration(
-                    DividerItemDecoration(
-                        context,
-                        LinearLayoutManager.HORIZONTAL
-                    )
-                )
+//                this.addItemDecoration(
+//                    DividerItemDecoration(
+//                        context,
+//                        LinearLayoutManager.HORIZONTAL
+//                    )
+//                )
                 this.isNestedScrollingEnabled = true
                 this.setHasFixedSize(true)
             }
+
+            tv_title.text = list[position].PostTitle;
             recyclerView?.adapter?.notifyDataSetChanged();
-            Log.e(TAG,"BlogAdapter Holder.bind called!");
 //            if (iv_thumbnail != null) {
 //                Glide.with(context)
 //                    .load(list[position])
@@ -68,4 +71,6 @@ class BlogAdapter(val mContext: Context, val mData: ArrayList<BlogItem>) :
 
         }
     }
+
+
 }

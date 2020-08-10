@@ -3,6 +3,7 @@ package kr.esens.searchnblogwithoutads
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
+import android.view.KeyEvent
 import android.view.View
 import android.webkit.WebViewClient
 import androidx.annotation.UiThread
@@ -54,22 +55,37 @@ class MainActivity : AppCompatActivity() {
         recycler_view.apply {
             this.adapter = blogAdapter
             this.layoutManager = mLinearLayoutManager
-            this.addItemDecoration(
-                DividerItemDecoration(
-                    mContext,
-                    LinearLayoutManager.VERTICAL
-                )
-            )
+//            this.addItemDecoration(
+//                DividerItemDecoration(
+//                    mContext,
+//                    LinearLayoutManager.VERTICAL
+//                )
+//            )
             this.isNestedScrollingEnabled = true
             this.setHasFixedSize(true)
         }
+
+
+        et_searchQuery.setOnKeyListener(View.OnKeyListener { v, keyCode, event ->
+            if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
+                executeSearch(et_searchQuery.text.toString())
+                return@OnKeyListener true
+            }
+            false
+        })
     }
 
     fun executeSearch(searchQuery: String) {
 
         var searchOption = "sim";
         var page = 1;
+
+        ar_blogList.clear();
+
         cl_no_data.visibility = View.GONE;
+//        LoadingDialog(this).show()
+        val dialog = LoadingDialog(this@MainActivity)
+        dialog.show()
 
         SearchRetrofit.getService()
             .requestBlogList(query = searchQuery, st = searchOption, start = page).enqueue(object :
@@ -83,16 +99,19 @@ class MainActivity : AppCompatActivity() {
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                 val str_res: String = response.body()?.string().toString();
 
+
                 coroutineScope.launch(Dispatchers.IO) {
                     val res: Document? = Jsoup.parse(str_res)
                     val elem: Elements? = res?.select("a.sh_blog_title")
 
                     elem?.forEachIndexed() { index, it ->
+
                         var blogItem = BlogItem();
                         //블로그 url 추출
                         val blog_url = parseBlogUri(it.attr("href"))
                         blogItem.BlogUrl = blog_url;
                         blogItem.BlogImages = ArrayList<String>();
+                        blogItem.PostTitle = it.attr("title");
 
                         Log.d(TAG, "blog_url : $blog_url")
 
@@ -112,7 +131,13 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     async {
-//                        blogAdapter?.notifyDataSetChanged();
+
+                        coroutineScope.launch (Dispatchers.Main){
+//                            LoadingDialog(mContext).dismiss()
+                            dialog.dismiss()
+                            blogAdapter?.notifyDataSetChanged();
+                        }
+
                     }.await()
 
                 }
