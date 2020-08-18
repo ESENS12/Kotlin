@@ -34,6 +34,7 @@ class BlogAdapter(val mContext: Context, val mData: ArrayList<BlogItem>) :
     inner class Holder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var recyclerView = itemView.findViewById<RecyclerView>(R.id.recycler_view_parent);
         var tv_title = itemView.findViewById<TextView>(R.id.tv_title)
+        var tv_fake = itemView.findViewById<TextView>(R.id.tv_fake);
 //        val iv_thumbnail = itemView?.findViewById<ImageView>(R.id.iv_thumbnail)
 //        val tv_index = itemView?.findViewById<TextView>(R.id.tv_index)
 
@@ -55,6 +56,12 @@ class BlogAdapter(val mContext: Context, val mData: ArrayList<BlogItem>) :
 //                )
                 this.isNestedScrollingEnabled = true
                 this.setHasFixedSize(true)
+            }
+
+            if(mData[position].bIsFakeBlog){
+                tv_fake.visibility = View.VISIBLE
+            }else{
+                tv_fake.visibility = View.GONE
             }
 
             tv_title.text = list[position].PostTitle;

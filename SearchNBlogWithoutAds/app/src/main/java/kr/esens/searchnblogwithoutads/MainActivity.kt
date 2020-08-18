@@ -91,14 +91,13 @@ class MainActivity : AppCompatActivity() {
             .requestBlogList(query = searchQuery, st = searchOption, start = page).enqueue(object :
             Callback<ResponseBody> {
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                Log.e(TAG, "res Failure : $t");
+                Log.e(TAG, "res Failure : $t")
             }
 
-                //todo Filtering Ads Classifier, UI Design
-
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
-                val str_res: String = response.body()?.string().toString();
+                val str_res: String = response.body()?.string().toString()
 
+                //todo  add developers menu -> FAKE BLOG SHOWING
 
                 coroutineScope.launch(Dispatchers.IO) {
                     val res: Document? = Jsoup.parse(str_res)
@@ -117,10 +116,15 @@ class MainActivity : AppCompatActivity() {
 
                         //해당 블로그에서 이미지 태그 uri 추출
                         val elem_item: Elements? = getImageUriFromBlog(blog_url);
-
+                        if (elem_item != null) {
+                            Log.e(TAG,"elem_item.length ${elem_item.size}")
+                        }
+                        val myClassifier = Classifier()
                         elem_item?.forEach {
                             val str_res = it.attr("src").replace("w80_blur" , "w800");
+                            val bIsFakeBlog = myClassifier.Classification(str_res)
 //                            Log.d(TAG,"imgUrl : $str_res");
+                            blogItem.bIsFakeBlog = bIsFakeBlog;
                             blogItem.BlogImages?.add(str_res);
                         }
 
@@ -159,7 +163,15 @@ class MainActivity : AppCompatActivity() {
             Log.e(TAG, "ERROR  : $e");
             return null
         }
-        return response.parse().select(nBlog_img_tag);
+        val item = response.parse()
+        val img_tag = item.select(nBlog_img_tag);
+
+        return if (img_tag.size == 0){
+            item.select("div.se-section.se-section-image > a > img[src]")
+        }else{
+            img_tag
+        }
+
     }
 
     //blog.me로 끝나는 naver blog url을 blog.naver.com으로 변경해줘야함
