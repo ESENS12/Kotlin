@@ -10,6 +10,7 @@ import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import okhttp3.ResponseBody
@@ -27,6 +28,7 @@ class MainActivity : AppCompatActivity() {
     companion object {
         const val TAG = "MainActivity"
         private lateinit var mContext : Context;
+        private var page = 1;
     }
 
     private val nBlog_img_tag = "div.se-module.se-module-image > a > img[src]" // naver blog 이미지 태그
@@ -42,15 +44,20 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         mContext = this.applicationContext;
+        val mLinearLayoutManager = LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL,false);
+
         my_webview.webViewClient = WebViewClient()
 
         blogAdapter = BlogAdapter(mContext, ar_blogList);
+
+        btn_searchMore.setOnClickListener {
+            searchMore();
+        }
+
         btn_search.setOnClickListener {
             Log.i(TAG, "Execute Search! : " + et_searchQuery.text);
             executeSearch(et_searchQuery.text.toString())
         }
-
-        val mLinearLayoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL,false);
 
         recycler_view.apply {
             this.adapter = blogAdapter
@@ -65,6 +72,7 @@ class MainActivity : AppCompatActivity() {
             this.setHasFixedSize(true)
         }
 
+//        setRecyclerViewScrollListener();
 
         et_searchQuery.setOnKeyListener(View.OnKeyListener { v, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
@@ -75,11 +83,33 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
+    //todo  set recycler view scroll listener!
+//
+//    private fun setRecyclerViewScrollListener() {
+//        scrollListener = object : RecyclerView.OnScrollListener() {
+//            override fun onScrollStateChanged(recyclerView: RecyclerView?, newState: Int) {
+//                super.onScrollStateChanged(recyclerView, newState)
+//                val totalItemCount = recyclerView!!.layoutManager.itemCount
+//                if (totalItemCount == lastVisibleItemPosition + 1) {
+//                    Log.d("MyTAG", "Load new list")
+//                    recycler_view.removeOnScrollListener(scrollListener)
+//                }
+//            }
+//        }
+//        recycler_view.addOnScrollListener(scrollListener)
+//    }
+
+    fun searchMore(){
+        page += 10
+        executeSearch(et_searchQuery.text.toString())
+    }
+
     fun executeSearch(searchQuery: String) {
 
         var searchOption = "sim";
-        var page = 1;
 
+
+        //todo SearchMore일때는 attach 형식? 아니면 clean? 아니면 내릴때마다 계속 알아서 검색(인스타 방식)
         ar_blogList.clear();
 
         cl_no_data.visibility = View.GONE;
@@ -96,8 +126,6 @@ class MainActivity : AppCompatActivity() {
 
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                 val str_res: String = response.body()?.string().toString()
-
-                //todo  add developers menu -> FAKE BLOG SHOWING
 
                 coroutineScope.launch(Dispatchers.IO) {
                     val res: Document? = Jsoup.parse(str_res)

@@ -7,7 +7,9 @@ import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.LinearSnapHelper
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.SnapHelper
 
 
 class BlogAdapter(val mContext: Context, val mData: ArrayList<BlogItem>) :
@@ -35,6 +37,7 @@ class BlogAdapter(val mContext: Context, val mData: ArrayList<BlogItem>) :
         var recyclerView = itemView.findViewById<RecyclerView>(R.id.recycler_view_parent);
         var tv_title = itemView.findViewById<TextView>(R.id.tv_title)
         var tv_fake = itemView.findViewById<TextView>(R.id.tv_fake);
+        var sanpHelper = LinearSnapHelper();
 //        val iv_thumbnail = itemView?.findViewById<ImageView>(R.id.iv_thumbnail)
 //        val tv_index = itemView?.findViewById<TextView>(R.id.tv_index)
 
@@ -44,6 +47,7 @@ class BlogAdapter(val mContext: Context, val mData: ArrayList<BlogItem>) :
 
             blogAdapter = list[position].BlogImages?.let {BlogImageAdapter(context, it)};
             val mLinearLayoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL,false);
+
 
             recyclerView.apply {
                 this.adapter = blogAdapter
@@ -57,6 +61,7 @@ class BlogAdapter(val mContext: Context, val mData: ArrayList<BlogItem>) :
                 this.isNestedScrollingEnabled = true
                 this.setHasFixedSize(true)
             }
+            sanpHelper.attachToRecyclerView(recyclerView);
 
             if(mData[position].bIsFakeBlog){
                 tv_fake.visibility = View.VISIBLE

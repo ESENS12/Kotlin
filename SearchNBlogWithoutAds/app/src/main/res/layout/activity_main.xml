@@ -139,5 +139,20 @@
 
    </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <!-- Bottom View Area  -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:id="@+id/cl_bottomView"
+        app:layout_constraintHeight_percent="0.05"
+        app:layout_constraintBottom_toBottomOf="parent"
+        >
+        <Button
+            android:id="@+id/btn_searchMore"
+            android:layout_width="match_parent"
+            android:text="SEARCH MORE"
+            android:layout_height="match_parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
