@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
 import android.view.View
+import android.webkit.WebResourceRequest
+import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
@@ -38,12 +40,23 @@ class MainActivity : AppCompatActivity() {
     private var ar_blogList = ArrayList<BlogItem>();
     private var blogAdapter: BlogAdapter? = null;
 
+
 //    private val blogAdapter = BlogAdapter(ar_blogList);
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         mContext = this.applicationContext;
+        my_webview.webViewClient = object : WebViewClient(){
+            override fun shouldOverrideUrlLoading(
+                view: WebView?,
+                url: String?
+            ): Boolean {
+                view?.loadUrl(url)
+                return true;
+//                return super.shouldOverrideUrlLoading(view, request)
+            }
+        }
         val mLinearLayoutManager = LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL,false);
 
         my_webview.webViewClient = WebViewClient()
@@ -55,8 +68,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         btn_search.setOnClickListener {
-            Log.i(TAG, "Execute Search! : " + et_searchQuery.text);
-            executeSearch(et_searchQuery.text.toString())
+            executeSearch(et_searchQuery.text.toString(),true)
         }
 
         recycler_view.apply {
@@ -70,13 +82,20 @@ class MainActivity : AppCompatActivity() {
 //            )
             this.isNestedScrollingEnabled = true
             this.setHasFixedSize(true)
+            this.addOnItemTouchListener(RecyclerItemClickListener(mContext,this, object: RecyclerItemClickListener.OnItemClickListener{
+                override fun onItemClick(view: View, position: Int) {
+                    Log.e(TAG,"item click! : $position")
+                    my_webview.visibility=View.VISIBLE;
+                    my_webview!!.loadUrl(ar_blogList[position].BlogUrl);
+                }
+            }))
         }
 
 //        setRecyclerViewScrollListener();
 
         et_searchQuery.setOnKeyListener(View.OnKeyListener { v, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
-                executeSearch(et_searchQuery.text.toString())
+                executeSearch(et_searchQuery.text.toString(),true)
                 return@OnKeyListener true
             }
             false
@@ -101,16 +120,19 @@ class MainActivity : AppCompatActivity() {
 
     fun searchMore(){
         page += 10
-        executeSearch(et_searchQuery.text.toString())
+        executeSearch(et_searchQuery.text.toString(),false)
     }
 
-    fun executeSearch(searchQuery: String) {
+    fun executeSearch(searchQuery: String, isNewSearch : Boolean) {
 
         var searchOption = "sim";
 
-
-        //todo SearchMore일때는 attach 형식? 아니면 clean? 아니면 내릴때마다 계속 알아서 검색(인스타 방식)
-        ar_blogList.clear();
+        //신규 검색일때만 기존 리스트 초기화(검색버튼 클릭)
+        if(isNewSearch){
+            ar_blogList.clear();
+            page = 1;
+        }
+        //todo 클릭 이벤트 제목만 가능하게 수정 , 백버튼 시 웹뷰 부터 닫게끔 수정, 멀티쓰레드 작업
 
         cl_no_data.visibility = View.GONE;
 //        LoadingDialog(this).show()

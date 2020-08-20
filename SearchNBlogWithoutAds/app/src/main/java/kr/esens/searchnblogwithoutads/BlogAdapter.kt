@@ -33,7 +33,7 @@ class BlogAdapter(val mContext: Context, val mData: ArrayList<BlogItem>) :
         holder.bind(mData, position, mContext)
     }
 
-    inner class Holder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class Holder(itemView: View) : RecyclerView.ViewHolder(itemView)  {
         var recyclerView = itemView.findViewById<RecyclerView>(R.id.recycler_view_parent);
         var tv_title = itemView.findViewById<TextView>(R.id.tv_title)
         var tv_fake = itemView.findViewById<TextView>(R.id.tv_fake);
@@ -80,9 +80,8 @@ class BlogAdapter(val mContext: Context, val mData: ArrayList<BlogItem>) :
 //                    .into(iv_thumbnail)
 //            }
 //            tv_index?.text = "$position"
-
         }
     }
 
-
 }
+

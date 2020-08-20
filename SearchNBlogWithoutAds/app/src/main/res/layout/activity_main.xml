@@ -78,11 +78,7 @@
        app:layout_constraintBottom_toBottomOf="parent"
        >
 
-       <WebView
-           android:layout_width="match_parent"
-           android:layout_height="match_parent"
-           android:id="@+id/my_webview"
-           ></WebView>
+
        <!-- 데이터 없음 -->
        <androidx.constraintlayout.widget.ConstraintLayout
            android:id="@+id/cl_no_data"
@@ -127,7 +123,12 @@
            </androidx.recyclerview.widget.RecyclerView>
        </androidx.constraintlayout.widget.ConstraintLayout>
 
-
+       <WebView
+           android:layout_width="match_parent"
+           android:layout_height="match_parent"
+           android:visibility="invisible"
+           android:id="@+id/my_webview"
+           />
 <!--       <ListView-->
 <!--           android:id="@+id/lv_searchData"-->
 <!--           android:layout_width="match_parent"-->
@@ -143,6 +144,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:visibility="visible"
         android:id="@+id/cl_bottomView"
         app:layout_constraintHeight_percent="0.05"
         app:layout_constraintBottom_toBottomOf="parent"
