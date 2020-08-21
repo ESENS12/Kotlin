@@ -5,14 +5,13 @@ import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
 import android.view.View
-import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.Toast
 import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import okhttp3.ResponseBody
@@ -23,7 +22,6 @@ import org.jsoup.select.Elements
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.lang.Exception
 
 
 class MainActivity : AppCompatActivity() {
@@ -39,14 +37,29 @@ class MainActivity : AppCompatActivity() {
     private var ar_blogimgList = ArrayList<String>();
     private var ar_blogList = ArrayList<BlogItem>();
     private var blogAdapter: BlogAdapter? = null;
+    private var mBackWait:Long = 0
 
+    override fun onBackPressed() {
 
-//    private val blogAdapter = BlogAdapter(ar_blogList);
+        // 뒤로가기 버튼 클릭
+        if(my_webview!!.visibility == View.VISIBLE){
+            my_webview.visibility = View.GONE;
+            return;
+        }
+
+        if(System.currentTimeMillis() - mBackWait >=2000 ) {
+            mBackWait = System.currentTimeMillis()
+            Toast.makeText(mContext,"뒤로가기 버튼을 한번 더 누르면 종료됩니다.", Toast.LENGTH_SHORT).show();
+        } else {
+            finish() //액티비티 종료
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         mContext = this.applicationContext;
+
         my_webview.webViewClient = object : WebViewClient(){
             override fun shouldOverrideUrlLoading(
                 view: WebView?,
@@ -57,12 +70,19 @@ class MainActivity : AppCompatActivity() {
 //                return super.shouldOverrideUrlLoading(view, request)
             }
         }
+
         val mLinearLayoutManager = LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL,false);
 
         my_webview.webViewClient = WebViewClient()
 
         blogAdapter = BlogAdapter(mContext, ar_blogList);
-
+        blogAdapter!!.setOnItemClickListener(object : BlogAdapter.OnItemClickListener {
+            override fun onItemClick(v: View, position: Int) {
+                my_webview.visibility=View.VISIBLE;
+                my_webview!!.loadUrl(ar_blogList[position].BlogUrl);
+//                Log.e(TAG,"onItemClick(main): $position" )
+            }
+        })
         btn_searchMore.setOnClickListener {
             searchMore();
         }
@@ -74,24 +94,9 @@ class MainActivity : AppCompatActivity() {
         recycler_view.apply {
             this.adapter = blogAdapter
             this.layoutManager = mLinearLayoutManager
-//            this.addItemDecoration(
-//                DividerItemDecoration(
-//                    mContext,
-//                    LinearLayoutManager.VERTICAL
-//                )
-//            )
             this.isNestedScrollingEnabled = true
             this.setHasFixedSize(true)
-            this.addOnItemTouchListener(RecyclerItemClickListener(mContext,this, object: RecyclerItemClickListener.OnItemClickListener{
-                override fun onItemClick(view: View, position: Int) {
-                    Log.e(TAG,"item click! : $position")
-                    my_webview.visibility=View.VISIBLE;
-                    my_webview!!.loadUrl(ar_blogList[position].BlogUrl);
-                }
-            }))
         }
-
-//        setRecyclerViewScrollListener();
 
         et_searchQuery.setOnKeyListener(View.OnKeyListener { v, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
@@ -101,22 +106,6 @@ class MainActivity : AppCompatActivity() {
             false
         })
     }
-
-    //todo  set recycler view scroll listener!
-//
-//    private fun setRecyclerViewScrollListener() {
-//        scrollListener = object : RecyclerView.OnScrollListener() {
-//            override fun onScrollStateChanged(recyclerView: RecyclerView?, newState: Int) {
-//                super.onScrollStateChanged(recyclerView, newState)
-//                val totalItemCount = recyclerView!!.layoutManager.itemCount
-//                if (totalItemCount == lastVisibleItemPosition + 1) {
-//                    Log.d("MyTAG", "Load new list")
-//                    recycler_view.removeOnScrollListener(scrollListener)
-//                }
-//            }
-//        }
-//        recycler_view.addOnScrollListener(scrollListener)
-//    }
 
     fun searchMore(){
         page += 10

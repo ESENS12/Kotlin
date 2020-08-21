@@ -1,10 +1,12 @@
 package kr.esens.searchnblogwithoutads
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
+import android.widget.AdapterView
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSnapHelper
@@ -13,10 +15,14 @@ import androidx.recyclerview.widget.SnapHelper
 
 
 class BlogAdapter(val mContext: Context, val mData: ArrayList<BlogItem>) :
-
     RecyclerView.Adapter<BlogAdapter.Holder>() {
 
+    interface OnItemClickListener{
+        fun onItemClick(v:View, position:Int);
+    }
+
     private var blogAdapter: BlogImageAdapter? = null;
+    private var onItemClickListener : OnItemClickListener? = null;
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
         val view = LayoutInflater.from(mContext).inflate(R.layout.blog_listitem, parent, false)
@@ -26,6 +32,10 @@ class BlogAdapter(val mContext: Context, val mData: ArrayList<BlogItem>) :
 
     override fun getItemCount(): Int {
         return mData.size
+    }
+
+    fun setOnItemClickListener(listener: OnItemClickListener){
+        this.onItemClickListener = listener;
     }
 
     override fun onBindViewHolder(holder: Holder, position: Int) {
@@ -48,6 +58,14 @@ class BlogAdapter(val mContext: Context, val mData: ArrayList<BlogItem>) :
             blogAdapter = list[position].BlogImages?.let {BlogImageAdapter(context, it)};
             val mLinearLayoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL,false);
 
+            tv_title.setOnClickListener {
+                Log.e("TAG","tv_title set onclick! $adapterPosition")
+                if(adapterPosition != RecyclerView.NO_POSITION){
+                    if(onItemClickListener != null){
+                        onItemClickListener!!.onItemClick(it,adapterPosition)
+                    }
+                }
+            }
 
             recyclerView.apply {
                 this.adapter = blogAdapter
