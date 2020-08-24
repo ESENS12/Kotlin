@@ -14,6 +14,14 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SnapHelper
 
 
+/*
+
+   TODO  1. lazy-loading 점검(리스트 하단 아이템 클릭 후 웹뷰 띄우면 웹뷰 내부 이미지들이 계속 흐린 상태임
+         2. 웹뷰 사이즈 및 z-index 조정(최상단으로)
+         3. 배너 로고가 이미지view에서는 보이지 않는 경우가 있음.
+
+*/
+
 class BlogAdapter(val mContext: Context, val mData: ArrayList<BlogItem>) :
     RecyclerView.Adapter<BlogAdapter.Holder>() {
 
@@ -78,6 +86,7 @@ class BlogAdapter(val mContext: Context, val mData: ArrayList<BlogItem>) :
 //                )
                 this.isNestedScrollingEnabled = true
                 this.setHasFixedSize(true)
+                this.addItemDecoration(CirclePagerIndicatorDecoration())
             }
             sanpHelper.attachToRecyclerView(recyclerView);
 
