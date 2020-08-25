@@ -123,20 +123,6 @@
            </androidx.recyclerview.widget.RecyclerView>
        </androidx.constraintlayout.widget.ConstraintLayout>
 
-       <WebView
-           android:layout_width="match_parent"
-           android:layout_height="match_parent"
-           android:visibility="invisible"
-           android:id="@+id/my_webview"
-           />
-<!--       <ListView-->
-<!--           android:id="@+id/lv_searchData"-->
-<!--           android:layout_width="match_parent"-->
-<!--           android:layout_height="match_parent"-->
-<!--           android:cacheColorHint = "#ffffff"-->
-<!--           android:divider = "#000000"-->
-<!--           android:dividerHeight = "1dp">-->
-<!--       </ListView>-->
 
    </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -156,5 +142,12 @@
             android:layout_height="match_parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <WebView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="invisible"
+        android:id="@+id/my_webview"
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

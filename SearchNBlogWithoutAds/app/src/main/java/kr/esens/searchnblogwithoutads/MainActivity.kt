@@ -1,6 +1,7 @@
 package kr.esens.searchnblogwithoutads
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
@@ -11,7 +12,6 @@ import android.widget.Toast
 import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import okhttp3.ResponseBody
@@ -29,6 +29,7 @@ class MainActivity : AppCompatActivity() {
         const val TAG = "MainActivity"
         private lateinit var mContext : Context;
         private var page = 1;
+        private var clearHistory = false;
     }
 
     private val nBlog_img_tag = "div.se-module.se-module-image > a > img[src]" // naver blog 이미지 태그
@@ -38,13 +39,24 @@ class MainActivity : AppCompatActivity() {
     private var ar_blogList = ArrayList<BlogItem>();
     private var blogAdapter: BlogAdapter? = null;
     private var mBackWait:Long = 0
+    private var loadingFinished = true
+    private var redirect = false
 
     override fun onBackPressed() {
 
         // 뒤로가기 버튼 클릭
         if(my_webview!!.visibility == View.VISIBLE){
+//            val list = my_webview.copyBackForwardList();
+
+            if(my_webview.canGoBackOrForward(-2)){
+                my_webview.goBack();
+                return
+            }
+
+            clearHistory = true
             my_webview.visibility = View.GONE;
-            return;
+            my_webview.loadUrl("about:blank");
+            return
         }
 
         if(System.currentTimeMillis() - mBackWait >=2000 ) {
@@ -60,29 +72,61 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         mContext = this.applicationContext;
 
+        my_webview.settings.javaScriptEnabled = true
         my_webview.webViewClient = object : WebViewClient(){
             override fun shouldOverrideUrlLoading(
                 view: WebView?,
                 url: String?
             ): Boolean {
+
+                if (!loadingFinished) {
+                    redirect = true;
+                }
+
+                loadingFinished = false;
+
                 view?.loadUrl(url)
-                return true;
+                return true
 //                return super.shouldOverrideUrlLoading(view, request)
+            }
+
+            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+
+                super.onPageStarted(view, url, favicon)
+                loadingFinished = false
+
+            }
+            override fun onPageFinished(view: WebView?, url: String?) {
+//                Log.e(TAG,"onPageFinished!")
+                if (!redirect) {
+                    loadingFinished = true;
+
+                    if(clearHistory){
+                        Log.e(TAG,"onPageFinished, clear History called");
+                        view?.clearHistory()
+                        clearHistory = false
+                    }
+                } else {
+                    redirect = false;
+                }
+
+                super.onPageFinished(view, url)
             }
         }
 
         val mLinearLayoutManager = LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL,false);
 
-        my_webview.webViewClient = WebViewClient()
+//        my_webview.webViewClient = WebViewClient()
 
         blogAdapter = BlogAdapter(mContext, ar_blogList);
         blogAdapter!!.setOnItemClickListener(object : BlogAdapter.OnItemClickListener {
             override fun onItemClick(v: View, position: Int) {
-                my_webview.visibility=View.VISIBLE;
                 my_webview!!.loadUrl(ar_blogList[position].BlogUrl);
+                my_webview.visibility = View.VISIBLE;
 //                Log.e(TAG,"onItemClick(main): $position" )
             }
         })
+
         btn_searchMore.setOnClickListener {
             searchMore();
         }
@@ -121,7 +165,6 @@ class MainActivity : AppCompatActivity() {
             ar_blogList.clear();
             page = 1;
         }
-        //todo 클릭 이벤트 제목만 가능하게 수정 , 백버튼 시 웹뷰 부터 닫게끔 수정, 멀티쓰레드 작업
 
         cl_no_data.visibility = View.GONE;
 //        LoadingDialog(this).show()
@@ -160,8 +203,15 @@ class MainActivity : AppCompatActivity() {
                         }
                         val myClassifier = Classifier()
                         elem_item?.forEach {
-                            val str_res = it.attr("src").replace("w80_blur" , "w800");
-                            val bIsFakeBlog = myClassifier.Classification(str_res)
+                            //todo  w966 check 하려고 했으나, 로딩 전에는 w80_blur 이므로 불가능해보임..
+//                            if(it.attr("src").contains("bitna2020")){
+////                                it.
+//                                Log.e(TAG,"str_res = ${it.attr("src")}")
+//                            }
+                            val bIsFakeBlog = myClassifier.Classification(it.attr("src"))
+
+                            var str_res = it.attr("src").replace("w80_blur" , "w800");
+                            str_res = str_res.replace("type=w966" , "type=w800");
 //                            Log.d(TAG,"imgUrl : $str_res");
                             blogItem.bIsFakeBlog = bIsFakeBlog;
                             blogItem.BlogImages?.add(str_res);
