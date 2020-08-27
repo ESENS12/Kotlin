@@ -5,6 +5,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
+import android.util.Log
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -56,8 +57,17 @@ class CirclePagerIndicatorDecoration : RecyclerView.ItemDecoration() {
         // center horizontally, calculate width and subtract half from center
         val totalLength = mIndicatorItemLength * itemCount
         val paddingBetweenItems = Math.max(0, itemCount - 1) * mIndicatorItemPadding
-        val indicatorTotalWidth = totalLength + paddingBetweenItems
+        var indicatorTotalWidth = totalLength + paddingBetweenItems
+
+
+        //todo  change it scrollable , define maximum width [device with / 2], horizontal align to center
+
+        if(indicatorTotalWidth > 600){
+            indicatorTotalWidth = 300f;
+        }
+
         val indicatorStartX = (parent.width - indicatorTotalWidth) / 2f
+//        Log.e("indicator" ,"indicatorTotalWidth : $indicatorTotalWidth")
 
         // center vertically in the allotted space
         val indicatorPosY = parent.height - mIndicatorHeight / 2f

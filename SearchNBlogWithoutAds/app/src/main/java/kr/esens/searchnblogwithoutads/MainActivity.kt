@@ -3,6 +3,7 @@ package kr.esens.searchnblogwithoutads
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.text.Editable
 import android.util.Log
 import android.view.KeyEvent
 import android.view.View
@@ -32,7 +33,12 @@ class MainActivity : AppCompatActivity() {
         private var clearHistory = false;
     }
 
-    private val nBlog_img_tag = "div.se-module.se-module-image > a > img[src]" // naver blog 이미지 태그
+
+    //디버깅 모드 (자동검색)
+    private val IS_DEBUUGING_MODE = false;
+    private var DEBUGGING_SEARCH_QUERY = "노원구 맛집";
+
+    private val nBlog_img_tag = "div.se-module.se-module-image > a > img[src], div.se-section.se-section-image > a > img[src], div.se-imageStrip-container > a > img[src]" // naver blog 이미지 태그
     private val parentJob = Job()
     private val coroutineScope = CoroutineScope(Dispatchers.Main + parentJob)
     private var ar_blogimgList = ArrayList<String>();
@@ -149,7 +155,15 @@ class MainActivity : AppCompatActivity() {
             }
             false
         })
+
+        //디버깅 모드(자동검색)
+        if(IS_DEBUUGING_MODE){
+            et_searchQuery.text = DEBUGGING_SEARCH_QUERY.toEditable();
+            executeSearch(et_searchQuery.text.toString(), true);
+        }
     }
+
+    fun String.toEditable(): Editable =  Editable.Factory.getInstance().newEditable(this)
 
     fun searchMore(){
         page += 10
@@ -208,6 +222,9 @@ class MainActivity : AppCompatActivity() {
 ////                                it.
 //                                Log.e(TAG,"str_res = ${it.attr("src")}")
 //                            }
+                            if(it.attr("src").contains("type=w966")){
+                                Log.e(TAG,"find w966!");
+                            }
                             val bIsFakeBlog = myClassifier.Classification(it.attr("src"))
 
                             var str_res = it.attr("src").replace("w80_blur" , "w800");
@@ -254,12 +271,16 @@ class MainActivity : AppCompatActivity() {
         }
         val item = response.parse()
         val img_tag = item.select(nBlog_img_tag);
+//        item.select("div.se-section.se-imageStrip-container > a > img[src]")
+        //section + 일반이미지로 되어야하는데..
 
-        return if (img_tag.size == 0){
-            item.select("div.se-section.se-section-image > a > img[src]")
-        }else{
-            img_tag
-        }
+//        return if (img_tag.size == 0){
+//            item.select("div.se-section.se-section-image > a > img[src]")
+//        }else{
+//            img_tag
+//        }
+
+        return img_tag
 
     }
 
