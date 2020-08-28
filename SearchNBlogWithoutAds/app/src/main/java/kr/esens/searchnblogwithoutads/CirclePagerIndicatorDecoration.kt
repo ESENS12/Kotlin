@@ -59,11 +59,9 @@ class CirclePagerIndicatorDecoration : RecyclerView.ItemDecoration() {
         val paddingBetweenItems = Math.max(0, itemCount - 1) * mIndicatorItemPadding
         var indicatorTotalWidth = totalLength + paddingBetweenItems
 
-
         //todo  change it scrollable , define maximum width [device with / 2], horizontal align to center
-
         if(indicatorTotalWidth > 600){
-            indicatorTotalWidth = 300f;
+            indicatorTotalWidth = 400f;
         }
 
         val indicatorStartX = (parent.width - indicatorTotalWidth) / 2f
@@ -73,10 +71,10 @@ class CirclePagerIndicatorDecoration : RecyclerView.ItemDecoration() {
         val indicatorPosY = parent.height - mIndicatorHeight / 2f
 
         drawInactiveIndicators(c, indicatorStartX, indicatorPosY, itemCount)
-
-
         // find active page (which should be highlighted)
+
         val layoutManager = parent.layoutManager as LinearLayoutManager?
+
         val activePosition = layoutManager!!.findFirstVisibleItemPosition()
         if (activePosition == RecyclerView.NO_POSITION) {
             return
@@ -105,6 +103,9 @@ class CirclePagerIndicatorDecoration : RecyclerView.ItemDecoration() {
             // draw the line for every item
             c.drawLine(start, indicatorPosY, start + mIndicatorItemLength, indicatorPosY, mPaint)
             start += itemWidth
+            if (i>10){
+                break;
+            }
         }
     }
 

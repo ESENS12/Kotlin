@@ -3,6 +3,7 @@ package kr.esens.searchnblogwithoutads
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.os.SystemClock
 import android.text.Editable
 import android.util.Log
 import android.view.KeyEvent
@@ -23,38 +24,43 @@ import org.jsoup.select.Elements
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import kotlin.system.measureTimeMillis
 
 
 class MainActivity : AppCompatActivity() {
     companion object {
         const val TAG = "MainActivity"
-        private lateinit var mContext : Context;
+        private lateinit var mContext: Context;
         private var page = 1;
         private var clearHistory = false;
     }
 
 
     //디버깅 모드 (자동검색)
-    private val IS_DEBUUGING_MODE = false;
+    private val IS_DEBUUGING_MODE = true;
     private var DEBUGGING_SEARCH_QUERY = "노원구 맛집";
 
-    private val nBlog_img_tag = "div.se-module.se-module-image > a > img[src], div.se-section.se-section-image > a > img[src], div.se-imageStrip-container > a > img[src]" // naver blog 이미지 태그
+    //시간 측정용
+    private val IS_CHECK_TIME_MODE = true;
+
+    private val nBlog_img_tag =
+        "div.se-module.se-module-image > a > img[src], div.se-section.se-section-image > a > img[src], div.se-imageStrip-container > a > img[src]" // naver blog 이미지 태그
     private val parentJob = Job()
     private val coroutineScope = CoroutineScope(Dispatchers.Main + parentJob)
     private var ar_blogimgList = ArrayList<String>();
     private var ar_blogList = ArrayList<BlogItem>();
     private var blogAdapter: BlogAdapter? = null;
-    private var mBackWait:Long = 0
+    private var mBackWait: Long = 0
     private var loadingFinished = true
     private var redirect = false
 
     override fun onBackPressed() {
 
         // 뒤로가기 버튼 클릭
-        if(my_webview!!.visibility == View.VISIBLE){
+        if (my_webview!!.visibility == View.VISIBLE) {
 //            val list = my_webview.copyBackForwardList();
 
-            if(my_webview.canGoBackOrForward(-2)){
+            if (my_webview.canGoBackOrForward(-2)) {
                 my_webview.goBack();
                 return
             }
@@ -65,9 +71,9 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        if(System.currentTimeMillis() - mBackWait >=2000 ) {
+        if (System.currentTimeMillis() - mBackWait >= 2000) {
             mBackWait = System.currentTimeMillis()
-            Toast.makeText(mContext,"뒤로가기 버튼을 한번 더 누르면 종료됩니다.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, "뒤로가기 버튼을 한번 더 누르면 종료됩니다.", Toast.LENGTH_SHORT).show();
         } else {
             finish() //액티비티 종료
         }
@@ -79,7 +85,7 @@ class MainActivity : AppCompatActivity() {
         mContext = this.applicationContext;
 
         my_webview.settings.javaScriptEnabled = true
-        my_webview.webViewClient = object : WebViewClient(){
+        my_webview.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(
                 view: WebView?,
                 url: String?
@@ -102,13 +108,14 @@ class MainActivity : AppCompatActivity() {
                 loadingFinished = false
 
             }
+
             override fun onPageFinished(view: WebView?, url: String?) {
 //                Log.e(TAG,"onPageFinished!")
                 if (!redirect) {
                     loadingFinished = true;
 
-                    if(clearHistory){
-                        Log.e(TAG,"onPageFinished, clear History called");
+                    if (clearHistory) {
+                        Log.e(TAG, "onPageFinished, clear History called");
                         view?.clearHistory()
                         clearHistory = false
                     }
@@ -120,7 +127,8 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val mLinearLayoutManager = LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL,false);
+        val mLinearLayoutManager =
+            LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false);
 
 //        my_webview.webViewClient = WebViewClient()
 
@@ -138,7 +146,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         btn_search.setOnClickListener {
-            executeSearch(et_searchQuery.text.toString(),true)
+            executeSearch(et_searchQuery.text.toString(), true)
         }
 
         recycler_view.apply {
@@ -150,110 +158,122 @@ class MainActivity : AppCompatActivity() {
 
         et_searchQuery.setOnKeyListener(View.OnKeyListener { v, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
-                executeSearch(et_searchQuery.text.toString(),true)
+                executeSearch(et_searchQuery.text.toString(), true)
                 return@OnKeyListener true
             }
             false
         })
 
         //디버깅 모드(자동검색)
-        if(IS_DEBUUGING_MODE){
+        if (IS_DEBUUGING_MODE) {
             et_searchQuery.text = DEBUGGING_SEARCH_QUERY.toEditable();
             executeSearch(et_searchQuery.text.toString(), true);
         }
     }
 
-    fun String.toEditable(): Editable =  Editable.Factory.getInstance().newEditable(this)
+    fun String.toEditable(): Editable = Editable.Factory.getInstance().newEditable(this)
 
-    fun searchMore(){
+    fun searchMore() {
         page += 10
-        executeSearch(et_searchQuery.text.toString(),false)
+        executeSearch(et_searchQuery.text.toString(), false)
     }
 
-    fun executeSearch(searchQuery: String, isNewSearch : Boolean) {
-
+    fun executeSearch(searchQuery: String, isNewSearch: Boolean) {
         var searchOption = "sim";
 
         //신규 검색일때만 기존 리스트 초기화(검색버튼 클릭)
-        if(isNewSearch){
+        if (isNewSearch) {
             ar_blogList.clear();
             page = 1;
         }
 
         cl_no_data.visibility = View.GONE;
-//        LoadingDialog(this).show()
+        //        LoadingDialog(this).show()
         val dialog = LoadingDialog(this@MainActivity)
         dialog.show()
 
         SearchRetrofit.getService()
             .requestBlogList(query = searchQuery, st = searchOption, start = page).enqueue(object :
-            Callback<ResponseBody> {
-            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                Log.e(TAG, "res Failure : $t")
-            }
+                Callback<ResponseBody> {
+                override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                    Log.e(TAG, "res Failure : $t")
+                }
 
-            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
-                val str_res: String = response.body()?.string().toString()
+                override fun onResponse(
+                    call: Call<ResponseBody>,
+                    response: Response<ResponseBody>
+                ) {
+                    val str_res: String = response.body()?.string().toString()
 
-                coroutineScope.launch(Dispatchers.IO) {
-                    val res: Document? = Jsoup.parse(str_res)
-                    val elem: Elements? = res?.select("a.sh_blog_title")
+                    coroutineScope.launch(Dispatchers.IO) {
+                        val elapsed: Long = measureTimeMillis {
+                            val res: Document? = Jsoup.parse(str_res)
+                            val elem: Elements? = res?.select("a.sh_blog_title")
 
-                    elem?.forEachIndexed() { index, it ->
+                            elem?.forEachIndexed() { index, it ->
 
-                        var blogItem = BlogItem();
-                        //블로그 url 추출
-                        val blog_url = parseBlogUri(it.attr("href"))
-                        blogItem.BlogUrl = blog_url;
-                        blogItem.BlogImages = ArrayList<String>();
-                        blogItem.PostTitle = it.attr("title");
+                                var blogItem = BlogItem();
+                                //블로그 url 추출
+                                val blog_url = parseBlogUri(it.attr("href"))
+                                blogItem.BlogUrl = blog_url;
+                                blogItem.BlogImages = ArrayList<String>();
+                                blogItem.PostTitle = it.attr("title");
 
-                        Log.d(TAG, "blog_url : $blog_url")
+                                Log.d(TAG, "blog_url : $blog_url")
 
-                        //해당 블로그에서 이미지 태그 uri 추출
-                        val elem_item: Elements? = getImageUriFromBlog(blog_url);
-                        if (elem_item != null) {
-                            Log.e(TAG,"elem_item.length ${elem_item.size}")
-                        }
-                        val myClassifier = Classifier()
-                        elem_item?.forEach {
-                            //todo  w966 check 하려고 했으나, 로딩 전에는 w80_blur 이므로 불가능해보임..
-//                            if(it.attr("src").contains("bitna2020")){
-////                                it.
-//                                Log.e(TAG,"str_res = ${it.attr("src")}")
-//                            }
-                            if(it.attr("src").contains("type=w966")){
-                                Log.e(TAG,"find w966!");
+                                //해당 블로그에서 이미지 태그 uri 추출
+                                val elem_item: Elements? = getImageUriFromBlog(blog_url);
+                                if (elem_item != null) {
+                                    Log.e(TAG, "elem_item.length ${elem_item.size}")
+                                }
+                                val myClassifier = Classifier()
+                                elem_item?.forEach {
+                                    //                            if(it.attr("src").contains("bitna2020")){
+                                    ////                                it.
+                                    //                                Log.e(TAG,"str_res = ${it.attr("src")}")
+                                    //                            }
+                                    if (it.attr("src").contains("type=w966")) {
+                                        Log.e(TAG, "find w966!");
+                                    }
+                                    val bIsFakeBlog = myClassifier.Classification(it.attr("src"))
+
+                                    var str_res = it.attr("src").replace("w80_blur", "w800");
+                                    str_res = str_res.replace("type=w966", "type=w800");
+                                    //                            Log.d(TAG,"imgUrl : $str_res");
+                                    blogItem.bIsFakeBlog = bIsFakeBlog;
+                                    if (blogItem.BlogImages?.size!! < 10) {
+                                        blogItem.BlogImages?.add(str_res);
+                                    }
+                                }
+
+                                Log.d(TAG, "====================$index=======================")
+                                if (blogItem.BlogImages?.size!! > 0) {
+                                    ar_blogList.add(blogItem)
+                                }
                             }
-                            val bIsFakeBlog = myClassifier.Classification(it.attr("src"))
 
-                            var str_res = it.attr("src").replace("w80_blur" , "w800");
-                            str_res = str_res.replace("type=w966" , "type=w800");
-//                            Log.d(TAG,"imgUrl : $str_res");
-                            blogItem.bIsFakeBlog = bIsFakeBlog;
-                            blogItem.BlogImages?.add(str_res);
+                            async {
+
+                                coroutineScope.launch(Dispatchers.Main) {
+                                    //                            LoadingDialog(mContext).dismiss()
+                                    dialog.dismiss()
+                                    blogAdapter?.notifyDataSetChanged();
+                                }
+
+                            }.await()
+
                         }
 
-                        Log.d(TAG, "====================$index=======================")
-                        if(blogItem.BlogImages?.size!! >0){
-                            ar_blogList.add(blogItem)
+                        if (IS_CHECK_TIME_MODE) {
+                            Log.e(TAG, "total elapsed time : $elapsed ms");
                         }
                     }
 
-                    async {
-
-                        coroutineScope.launch (Dispatchers.Main){
-//                            LoadingDialog(mContext).dismiss()
-                            dialog.dismiss()
-                            blogAdapter?.notifyDataSetChanged();
-                        }
-
-                    }.await()
-
                 }
 
-            }
-        })
+            })
+
+
     }
 
     @UiThread
@@ -271,6 +291,7 @@ class MainActivity : AppCompatActivity() {
         }
         val item = response.parse()
         val img_tag = item.select(nBlog_img_tag);
+
 //        item.select("div.se-section.se-imageStrip-container > a > img[src]")
         //section + 일반이미지로 되어야하는데..
 
