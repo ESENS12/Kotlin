@@ -3,7 +3,6 @@ package kr.esens.searchnblogwithoutads
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.Bundle
-import android.os.SystemClock
 import android.text.Editable
 import android.util.Log
 import android.view.KeyEvent
@@ -14,6 +13,8 @@ import android.widget.Toast
 import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.OnScrollListener
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import okhttp3.ResponseBody
@@ -154,7 +155,23 @@ class MainActivity : AppCompatActivity() {
             this.layoutManager = mLinearLayoutManager
             this.isNestedScrollingEnabled = true
             this.setHasFixedSize(true)
+            this.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                    super.onScrollStateChanged(recyclerView, newState)
+                    if(!canScrollVertically(1)){
+//                        Log.e(TAG,"Bottom!")
+
+                        //todo 바텀뷰에 animation 먹이고, 디자인 적용!
+                        btn_searchMore.visibility = View.VISIBLE
+                    }else{
+//                        Log.e(TAG,"Not Bottom!")
+                        btn_searchMore.visibility = View.GONE
+                    }
+
+                }
+            })
         }
+
 
         et_searchQuery.setOnKeyListener(View.OnKeyListener { v, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
@@ -170,6 +187,16 @@ class MainActivity : AppCompatActivity() {
             executeSearch(et_searchQuery.text.toString(), true);
         }
     }
+
+//    fun RecyclerView.onScrollToEnd(linearLayoutManager: LinearLayoutManager, onScrollNearEnd: (Unit) -> Unit)
+//            = addOnScrollListener(object : RecyclerView.OnScrollListener() {
+//        override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int) {
+//            if (linearLayoutManager.childCount + linearLayoutManager.findFirstVisibleItemPosition()
+//                >= linearLayoutManager.itemCount - 5) {  //if near fifth item from end
+//                onScrollNearEnd(Unit)
+//            }
+//        }
+//    })
 
     fun String.toEditable(): Editable = Editable.Factory.getInstance().newEditable(this)
 

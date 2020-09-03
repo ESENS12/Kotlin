@@ -53,7 +53,7 @@ class BlogAdapter(val mContext: Context, val mData: ArrayList<BlogItem>) :
         var recyclerView = itemView.findViewById<RecyclerView>(R.id.recycler_view_parent);
         var tv_title = itemView.findViewById<TextView>(R.id.tv_title)
         var tv_fake = itemView.findViewById<TextView>(R.id.tv_fake);
-        var sanpHelper = LinearSnapHelper();
+        var snapHelper = LinearSnapHelper();
 //        val iv_thumbnail = itemView?.findViewById<ImageView>(R.id.iv_thumbnail)
 //        val tv_index = itemView?.findViewById<TextView>(R.id.tv_index)
 
@@ -83,9 +83,10 @@ class BlogAdapter(val mContext: Context, val mData: ArrayList<BlogItem>) :
 //                )
                 this.isNestedScrollingEnabled = true
                 this.setHasFixedSize(true)
-                this.addItemDecoration(CirclePagerIndicatorDecoration())
+                //todo remove dots untill find scrollable, reuseable decoration
+//                this.addItemDecoration(CirclePagerIndicatorDecoration())
             }
-            sanpHelper.attachToRecyclerView(recyclerView);
+            snapHelper.attachToRecyclerView(recyclerView);
 
             if(mData[position].bIsFakeBlog){
                 tv_fake.visibility = View.VISIBLE
