@@ -132,6 +132,7 @@
         android:layout_height="0dp"
         android:visibility="visible"
         android:id="@+id/cl_bottomView"
+        android:background="@drawable/searchmore_bg_round"
         app:layout_constraintHeight_percent="0.05"
         app:layout_constraintBottom_toBottomOf="parent"
         >
@@ -139,6 +140,7 @@
             android:id="@+id/btn_searchMore"
             android:layout_width="match_parent"
             android:text="SEARCH MORE"
+            android:visibility="visible"
             android:layout_height="match_parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

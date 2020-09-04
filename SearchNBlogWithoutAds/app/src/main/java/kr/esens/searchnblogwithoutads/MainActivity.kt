@@ -159,12 +159,8 @@ class MainActivity : AppCompatActivity() {
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                     super.onScrollStateChanged(recyclerView, newState)
                     if(!canScrollVertically(1)){
-//                        Log.e(TAG,"Bottom!")
-
-                        //todo 바텀뷰에 animation 먹이고, 디자인 적용!
                         btn_searchMore.visibility = View.VISIBLE
                     }else{
-//                        Log.e(TAG,"Not Bottom!")
                         btn_searchMore.visibility = View.GONE
                     }
 
