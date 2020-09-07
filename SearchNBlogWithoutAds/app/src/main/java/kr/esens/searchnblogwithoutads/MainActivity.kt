@@ -184,16 +184,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-//    fun RecyclerView.onScrollToEnd(linearLayoutManager: LinearLayoutManager, onScrollNearEnd: (Unit) -> Unit)
-//            = addOnScrollListener(object : RecyclerView.OnScrollListener() {
-//        override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int) {
-//            if (linearLayoutManager.childCount + linearLayoutManager.findFirstVisibleItemPosition()
-//                >= linearLayoutManager.itemCount - 5) {  //if near fifth item from end
-//                onScrollNearEnd(Unit)
-//            }
-//        }
-//    })
-
     fun String.toEditable(): Editable = Editable.Factory.getInstance().newEditable(this)
 
     fun searchMore() {
@@ -228,10 +218,13 @@ class MainActivity : AppCompatActivity() {
                 ) {
                     val str_res: String = response.body()?.string().toString()
 
+
+                    // 여기서 str_res 를 parsing 하고, url까지만 추출 한 다음, url과 index를 가지고 digging more 요청은 subsequential하게 수정
                     coroutineScope.launch(Dispatchers.IO) {
                         val elapsed: Long = measureTimeMillis {
                             val res: Document? = Jsoup.parse(str_res)
                             val elem: Elements? = res?.select("a.sh_blog_title")
+                            var blogItemList = Array<BlogItem>(10) { BlogItem() };
 
                             elem?.forEachIndexed() { index, it ->
 
@@ -242,45 +235,47 @@ class MainActivity : AppCompatActivity() {
                                 blogItem.BlogImages = ArrayList<String>();
                                 blogItem.PostTitle = it.attr("title");
 
+                                blogItemList[index] = (blogItem);
+
                                 Log.d(TAG, "blog_url : $blog_url")
 
-                                //해당 블로그에서 이미지 태그 uri 추출
-                                val elem_item: Elements? = getImageUriFromBlog(blog_url);
-                                if (elem_item != null) {
-                                    Log.e(TAG, "elem_item.length ${elem_item.size}")
-                                }
-                                val myClassifier = Classifier()
-                                elem_item?.forEach {
-                                    //                            if(it.attr("src").contains("bitna2020")){
-                                    ////                                it.
-                                    //                                Log.e(TAG,"str_res = ${it.attr("src")}")
-                                    //                            }
-                                    if (it.attr("src").contains("type=w966")) {
-                                        Log.e(TAG, "find w966!");
-                                    }
-                                    val bIsFakeBlog = myClassifier.Classification(it.attr("src"))
-
-                                    var str_res = it.attr("src").replace("w80_blur", "w800");
-                                    str_res = str_res.replace("type=w966", "type=w800");
-                                    //                            Log.d(TAG,"imgUrl : $str_res");
-                                    blogItem.bIsFakeBlog = bIsFakeBlog;
-                                    if (blogItem.BlogImages?.size!! < 10) {
-                                        blogItem.BlogImages?.add(str_res);
-                                    }
-                                }
-
-                                Log.d(TAG, "====================$index=======================")
-                                if (blogItem.BlogImages?.size!! > 0) {
-                                    ar_blogList.add(blogItem)
-                                }
+//                                //해당 블로그에서 이미지 태그 uri 추출
+//                                val elem_item: Elements? = getImageUriFromBlog(blog_url);
+//                                if (elem_item != null) {
+//                                    Log.e(TAG, "elem_item.length ${elem_item.size}")
+//                                }
+//                                val myClassifier = Classifier()
+//                                elem_item?.forEach {
+//
+//                                    if (it.attr("src").contains("type=w966")) {
+//                                        Log.e(TAG, "find w966!");
+//                                    }
+//
+//                                    val bIsFakeBlog = myClassifier.Classification(it.attr("src"))
+//
+//                                    var str_res = it.attr("src").replace("w80_blur", "w800");
+//                                    str_res = str_res.replace("type=w966", "type=w800");
+//                                    //                            Log.d(TAG,"imgUrl : $str_res");
+//                                    blogItem.bIsFakeBlog = bIsFakeBlog;
+//                                    if (blogItem.BlogImages?.size!! < 10) {
+//                                        blogItem.BlogImages?.add(str_res);
+//                                    }
+//                                }
+//
+//                                Log.d(TAG, "====================$index=======================")
+//                                if (blogItem.BlogImages?.size!! > 0) {
+//                                    ar_blogList.add(blogItem)
+//                                }
                             }
+
+                            basic_sequential(blogItemList);
 
                             async {
 
                                 coroutineScope.launch(Dispatchers.Main) {
                                     //                            LoadingDialog(mContext).dismiss()
                                     dialog.dismiss()
-                                    blogAdapter?.notifyDataSetChanged();
+//                                    blogAdapter?.notifyDataSetChanged();
                                 }
 
                             }.await()
@@ -339,4 +334,130 @@ class MainActivity : AppCompatActivity() {
             return url.replace("https://", "https://m.")
         }
     }
+
+
+    suspend fun digging_more_for_images(blogItem : BlogItem): BlogItem{
+        val elem_item: Elements? = getImageUriFromBlog(blogItem.BlogUrl);
+        if (elem_item != null) {
+            Log.e(TAG, "1__elem_item.length ${elem_item.size}")
+        }
+        val myClassifier = Classifier()
+        elem_item?.forEach {
+
+            if (it.attr("src").contains("type=w966")) {
+                Log.e(TAG, "find w966!");
+            }
+
+            val bIsFakeBlog = myClassifier.Classification(it.attr("src"))
+
+            var str_res = it.attr("src").replace("w80_blur", "w800");
+            str_res = str_res.replace("type=w966", "type=w800");
+            //                            Log.d(TAG,"imgUrl : $str_res");
+            blogItem.bIsFakeBlog = bIsFakeBlog;
+            if (blogItem.BlogImages?.size!! < 10) {
+                blogItem.BlogImages?.add(str_res);
+            }
+        }
+        return blogItem
+    }
+
+    suspend fun digging_more_for_images_two(blogItem : BlogItem): BlogItem{
+        val elem_item: Elements? = getImageUriFromBlog(blogItem.BlogUrl);
+        if (elem_item != null) {
+            Log.e(TAG, "2__elem_item.length ${elem_item.size}")
+        }
+        val myClassifier = Classifier()
+        elem_item?.forEach {
+
+            if (it.attr("src").contains("type=w966")) {
+                Log.e(TAG, "find w966!");
+            }
+
+            val bIsFakeBlog = myClassifier.Classification(it.attr("src"))
+
+            var str_res = it.attr("src").replace("w80_blur", "w800");
+            str_res = str_res.replace("type=w966", "type=w800");
+            //                            Log.d(TAG,"imgUrl : $str_res");
+            blogItem.bIsFakeBlog = bIsFakeBlog;
+            if (blogItem.BlogImages?.size!! < 10) {
+                blogItem.BlogImages?.add(str_res);
+            }
+        }
+        return blogItem
+    }
+
+
+    suspend fun doSomethingUsefulTwo(): Int{
+        delay(3000L)
+        return 29
+    }
+
+    fun basic_sequential(blogList : Array<BlogItem>) = runBlocking {
+        var blogItem1 : BlogItem;
+        var blogItem2 : BlogItem;
+//        blogList.forEachIndexed {index, it ->
+//            Log.e(TAG,"blogitem : $index , ${it.BlogUrl}")
+
+//            blogItem = async(start = CoroutineStart.LAZY) { digging_more_for_images(blogList[0]) }.await()
+
+        //1279 ms
+        val time = measureTimeMillis {
+            val one = async(start = CoroutineStart.LAZY) { digging_more_for_images(blogList[0]) }
+            val two = async(start = CoroutineStart.LAZY) { digging_more_for_images_two(blogList[9]) }
+            one.start()
+            two.start()
+            blogItem1 = one.await();
+            blogItem2 = two.await();
+            ar_blogList.add(blogItem1)
+            ar_blogList.add(blogItem2)
+        }
+//        ar_blogList.add(async(start = CoroutineStart.LAZY) { digging_more_for_images(blogList[0]) }.await())
+//            ar_blogList.add(async(start = CoroutineStart.LAZY) { digging_more_for_images(blogList[1]) }.await())
+//            ar_blogList.add(async(start = CoroutineStart.LAZY) { digging_more_for_images(blogList[2]) }.await())
+//            ar_blogList.add(async(start = CoroutineStart.LAZY) { digging_more_for_images(blogList[3]) }.await())
+//            ar_blogList.add(async(start = CoroutineStart.LAZY) { digging_more_for_images(blogList[4]) }.await())
+//            ar_blogList.add(async(start = CoroutineStart.LAZY) { digging_more_for_images_two(blogList[5]) }.await())
+//            ar_blogList.add(async(start = CoroutineStart.LAZY) { digging_more_for_images_two(blogList[6]) }.await())
+//            ar_blogList.add(async(start = CoroutineStart.LAZY) { digging_more_for_images_two(blogList[7]) }.await())
+//            ar_blogList.add(async(start = CoroutineStart.LAZY) { digging_more_for_images_two(blogList[8]) }.await())
+//        ar_blogList.add(async(start = CoroutineStart.LAZY) { digging_more_for_images_two(blogList[9]) }.await())
+        Log.e(TAG,"digging more is completed in $time ms")
+
+//        val two = async(start = CoroutineStart.LAZY) { doSomethingUsefulTwo() }
+//        // some computation
+//            one.start() // start the first one
+//            two.start() // start the second one
+//            blogItem = one.await();
+//            Log.d(TAG,"The answer is ${blogItem.bIsFakeBlog}")
+
+//            if (blogItem.BlogImages?.size!! > 0) {
+//                ar_blogList.add(blogItem)
+//            }
+
+//        }
+
+
+        async {
+
+            coroutineScope.launch(Dispatchers.Main) {
+                //                            LoadingDialog(mContext).dismiss()
+//                dialog.dismiss()
+                blogAdapter?.notifyDataSetChanged();
+            }
+
+        }.await()
+
+
+//        dialog.dismiss()
+//        blogAdapter?.notifyDataSetChanged();
+
+//        val one = async(start = CoroutineStart.LAZY) { doSomethingUsefulOne() }
+//        val two = async(start = CoroutineStart.LAZY) { doSomethingUsefulTwo() }
+//        // some computation
+//        one.start() // start the first one
+//        two.start() // start the second one
+//        Log.d(TAG,"The answer is ${one.await() + two.await()}")
+
+    }
+
 }

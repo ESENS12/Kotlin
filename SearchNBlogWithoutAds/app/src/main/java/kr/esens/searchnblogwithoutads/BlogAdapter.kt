@@ -75,17 +75,13 @@ class BlogAdapter(val mContext: Context, val mData: ArrayList<BlogItem>) :
             recyclerView.apply {
                 this.adapter = blogAdapter
                 this.layoutManager = mLinearLayoutManager
-//                this.addItemDecoration(
-//                    DividerItemDecoration(
-//                        context,
-//                        LinearLayoutManager.HORIZONTAL
-//                    )
-//                )
                 this.isNestedScrollingEnabled = true
                 this.setHasFixedSize(true)
-                //todo remove dots untill find scrollable, reuseable decoration
-//                this.addItemDecoration(CirclePagerIndicatorDecoration())
+                if(this.itemDecorationCount == 0){
+                    this.addItemDecoration(CirclePagerIndicatorDecoration())
+                }
             }
+
             snapHelper.attachToRecyclerView(recyclerView);
 
             if(mData[position].bIsFakeBlog){
@@ -96,15 +92,7 @@ class BlogAdapter(val mContext: Context, val mData: ArrayList<BlogItem>) :
 
             tv_title.text = list[position].PostTitle;
             recyclerView?.adapter?.notifyDataSetChanged();
-//            if (iv_thumbnail != null) {
-//                Glide.with(context)
-//                    .load(list[position])
-//                    //                    .override(이미지 사이즈) //만약 리소스 조정이 필요하다면, 캐시낭비를 막는데 효과적임
-//                    //                .placeholder(R.drawable.loading)
-//                    //                .error(R.drawable.image_not_found)
-//                    .into(iv_thumbnail)
-//            }
-//            tv_index?.text = "$position"
+
         }
     }
 
