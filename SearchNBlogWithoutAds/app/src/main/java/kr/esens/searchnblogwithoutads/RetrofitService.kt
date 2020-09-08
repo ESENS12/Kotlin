@@ -16,6 +16,7 @@ interface RetrofitService {
         @Query("tab_pge") tab_pge: String="tab_pge",
         @Query("srchby") srchby: String="all",
         @Query("st") st: String,
+        @Query("display") display: Int=8,
         @Query("where") where: String="post",
         @Query("start") start: Int=1
     ): Call<ResponseBody>

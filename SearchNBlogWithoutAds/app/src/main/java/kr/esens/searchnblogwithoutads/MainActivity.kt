@@ -1,5 +1,6 @@
 package kr.esens.searchnblogwithoutads
 
+import android.app.Dialog
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.Bundle
@@ -14,7 +15,6 @@ import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.RecyclerView.OnScrollListener
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import okhttp3.ResponseBody
@@ -31,9 +31,10 @@ import kotlin.system.measureTimeMillis
 class MainActivity : AppCompatActivity() {
     companion object {
         const val TAG = "MainActivity"
-        private lateinit var mContext: Context;
-        private var page = 1;
-        private var clearHistory = false;
+        private lateinit var mContext: Context
+        private var page = 1
+        private var clearHistory = false
+        private lateinit var mDialog: Dialog
     }
 
 
@@ -50,6 +51,7 @@ class MainActivity : AppCompatActivity() {
     private val coroutineScope = CoroutineScope(Dispatchers.Main + parentJob)
     private var ar_blogimgList = ArrayList<String>();
     private var ar_blogList = ArrayList<BlogItem>();
+    private var ar_blogUrlList = ArrayList<String>();
     private var blogAdapter: BlogAdapter? = null;
     private var mBackWait: Long = 0
     private var loadingFinished = true
@@ -83,7 +85,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        mContext = this.applicationContext;
+        mContext = this.applicationContext
+        mDialog = LoadingDialog(this)
 
         my_webview.settings.javaScriptEnabled = true
         my_webview.webViewClient = object : WebViewClient() {
@@ -158,16 +161,14 @@ class MainActivity : AppCompatActivity() {
             this.addOnScrollListener(object : RecyclerView.OnScrollListener() {
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                     super.onScrollStateChanged(recyclerView, newState)
-                    if(!canScrollVertically(1)){
-                        btn_searchMore.visibility = View.VISIBLE
-                    }else{
-                        btn_searchMore.visibility = View.GONE
+                    if (!canScrollVertically(1)) {
+                        cl_bottomView.visibility = View.VISIBLE
+                    } else {
+                        cl_bottomView.visibility = View.GONE
                     }
-
                 }
             })
         }
-
 
         et_searchQuery.setOnKeyListener(View.OnKeyListener { v, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
@@ -201,30 +202,31 @@ class MainActivity : AppCompatActivity() {
         }
 
         cl_no_data.visibility = View.GONE;
-        //        LoadingDialog(this).show()
-        val dialog = LoadingDialog(this@MainActivity)
-        dialog.show()
 
-        SearchRetrofit.getService()
-            .requestBlogList(query = searchQuery, st = searchOption, start = page).enqueue(object :
-                Callback<ResponseBody> {
-                override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                    Log.e(TAG, "res Failure : $t")
-                }
+        showNhide_dialog(true);
 
-                override fun onResponse(
-                    call: Call<ResponseBody>,
-                    response: Response<ResponseBody>
-                ) {
-                    val str_res: String = response.body()?.string().toString()
+        coroutineScope.launch(Dispatchers.IO) {
+            SearchRetrofit.getService()
+                .requestBlogList(query = searchQuery, st = searchOption, start = page)
+                .enqueue(object :
+                    Callback<ResponseBody> {
+                    override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                        Log.e(TAG, "res Failure : $t")
+                    }
+
+                    override fun onResponse(
+                        call: Call<ResponseBody>,
+                        response: Response<ResponseBody>
+                    ) {
+                        val str_res: String = response.body()?.string().toString()
 
 
-                    // 여기서 str_res 를 parsing 하고, url까지만 추출 한 다음, url과 index를 가지고 digging more 요청은 subsequential하게 수정
-                    coroutineScope.launch(Dispatchers.IO) {
+                        // 여기서 str_res 를 parsing 하고, url까지만 추출 한 다음, url과 index를 가지고 digging more 요청은 subsequential하게 수정
                         val elapsed: Long = measureTimeMillis {
                             val res: Document? = Jsoup.parse(str_res)
                             val elem: Elements? = res?.select("a.sh_blog_title")
                             var blogItemList = Array<BlogItem>(10) { BlogItem() };
+//                            Log.e(TAG,"elem.size : ${elem?.size}")
 
                             elem?.forEachIndexed() { index, it ->
 
@@ -239,57 +241,30 @@ class MainActivity : AppCompatActivity() {
 
                                 Log.d(TAG, "blog_url : $blog_url")
 
-//                                //해당 블로그에서 이미지 태그 uri 추출
-//                                val elem_item: Elements? = getImageUriFromBlog(blog_url);
-//                                if (elem_item != null) {
-//                                    Log.e(TAG, "elem_item.length ${elem_item.size}")
-//                                }
-//                                val myClassifier = Classifier()
-//                                elem_item?.forEach {
-//
-//                                    if (it.attr("src").contains("type=w966")) {
-//                                        Log.e(TAG, "find w966!");
-//                                    }
-//
-//                                    val bIsFakeBlog = myClassifier.Classification(it.attr("src"))
-//
-//                                    var str_res = it.attr("src").replace("w80_blur", "w800");
-//                                    str_res = str_res.replace("type=w966", "type=w800");
-//                                    //                            Log.d(TAG,"imgUrl : $str_res");
-//                                    blogItem.bIsFakeBlog = bIsFakeBlog;
-//                                    if (blogItem.BlogImages?.size!! < 10) {
-//                                        blogItem.BlogImages?.add(str_res);
-//                                    }
-//                                }
-//
-//                                Log.d(TAG, "====================$index=======================")
-//                                if (blogItem.BlogImages?.size!! > 0) {
-//                                    ar_blogList.add(blogItem)
-//                                }
                             }
 
                             basic_sequential(blogItemList);
-
-                            async {
-
-                                coroutineScope.launch(Dispatchers.Main) {
-                                    //                            LoadingDialog(mContext).dismiss()
-                                    dialog.dismiss()
-//                                    blogAdapter?.notifyDataSetChanged();
-                                }
-
-                            }.await()
-
                         }
 
                         if (IS_CHECK_TIME_MODE) {
                             Log.e(TAG, "total elapsed time : $elapsed ms");
                         }
+
                     }
 
+                })
+
+            async {
+
+                coroutineScope.launch(Dispatchers.Main) {
+                    //                            LoadingDialog(mContext).dismiss()
+//                    dialog.dismiss()
+//                                    blogAdapter?.notifyDataSetChanged();
                 }
 
-            })
+            }.await()
+
+        }
 
 
     }
@@ -336,7 +311,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    suspend fun digging_more_for_images(blogItem : BlogItem): BlogItem{
+    suspend fun digging_more_for_images(blogItem: BlogItem): BlogItem {
         val elem_item: Elements? = getImageUriFromBlog(blogItem.BlogUrl);
         if (elem_item != null) {
             Log.e(TAG, "1__elem_item.length ${elem_item.size}")
@@ -361,103 +336,64 @@ class MainActivity : AppCompatActivity() {
         return blogItem
     }
 
-    suspend fun digging_more_for_images_two(blogItem : BlogItem): BlogItem{
-        val elem_item: Elements? = getImageUriFromBlog(blogItem.BlogUrl);
-        if (elem_item != null) {
-            Log.e(TAG, "2__elem_item.length ${elem_item.size}")
-        }
-        val myClassifier = Classifier()
-        elem_item?.forEach {
+    fun basic_sequential(blogList: Array<BlogItem>) = runBlocking {
+        launch(Dispatchers.IO) {
 
-            if (it.attr("src").contains("type=w966")) {
-                Log.e(TAG, "find w966!");
+            var blogItem1: BlogItem;
+            var blogItem2: BlogItem;
+            var blogItem3: BlogItem;
+
+            val time = measureTimeMillis {
+                for(i in 0..2){
+                    val one =
+                        async(start = CoroutineStart.LAZY) {
+                            digging_more_for_images(blogList[i])
+                        }
+                    val two =
+                        async(start = CoroutineStart.LAZY) {
+                            digging_more_for_images(blogList[i+3])
+                        }
+                    val three =
+                        async(start = CoroutineStart.LAZY) {
+                            digging_more_for_images(blogList[i+6])
+                        }
+
+                    one.start()
+                    two.start()
+                    three.start()
+
+                    blogItem1 = one.await()
+                    blogItem2 = two.await()
+                    blogItem3 = three.await()
+
+                    ar_blogList.add(blogItem1)
+                    ar_blogList.add(blogItem2)
+                    ar_blogList.add(blogItem3)
+                }
             }
 
-            val bIsFakeBlog = myClassifier.Classification(it.attr("src"))
+            Log.e(TAG, "digging more is completed in $time ms")
 
-            var str_res = it.attr("src").replace("w80_blur", "w800");
-            str_res = str_res.replace("type=w966", "type=w800");
-            //                            Log.d(TAG,"imgUrl : $str_res");
-            blogItem.bIsFakeBlog = bIsFakeBlog;
-            if (blogItem.BlogImages?.size!! < 10) {
-                blogItem.BlogImages?.add(str_res);
+            withContext(Dispatchers.IO) {
+
+                coroutineScope.launch(Dispatchers.Main) {
+                    showNhide_dialog(false)
+                    blogAdapter?.notifyDataSetChanged()
+                }
+
             }
+
         }
-        return blogItem
+
     }
 
 
-    suspend fun doSomethingUsefulTwo(): Int{
-        delay(3000L)
-        return 29
-    }
-
-    fun basic_sequential(blogList : Array<BlogItem>) = runBlocking {
-        var blogItem1 : BlogItem;
-        var blogItem2 : BlogItem;
-//        blogList.forEachIndexed {index, it ->
-//            Log.e(TAG,"blogitem : $index , ${it.BlogUrl}")
-
-//            blogItem = async(start = CoroutineStart.LAZY) { digging_more_for_images(blogList[0]) }.await()
-
-        //1279 ms
-        val time = measureTimeMillis {
-            val one = async(start = CoroutineStart.LAZY) { digging_more_for_images(blogList[0]) }
-            val two = async(start = CoroutineStart.LAZY) { digging_more_for_images_two(blogList[9]) }
-            one.start()
-            two.start()
-            blogItem1 = one.await();
-            blogItem2 = two.await();
-            ar_blogList.add(blogItem1)
-            ar_blogList.add(blogItem2)
+    fun showNhide_dialog(isShow : Boolean){
+        if(isShow){
+            mDialog.show()
+        }else{
+            mDialog.hide()
         }
-//        ar_blogList.add(async(start = CoroutineStart.LAZY) { digging_more_for_images(blogList[0]) }.await())
-//            ar_blogList.add(async(start = CoroutineStart.LAZY) { digging_more_for_images(blogList[1]) }.await())
-//            ar_blogList.add(async(start = CoroutineStart.LAZY) { digging_more_for_images(blogList[2]) }.await())
-//            ar_blogList.add(async(start = CoroutineStart.LAZY) { digging_more_for_images(blogList[3]) }.await())
-//            ar_blogList.add(async(start = CoroutineStart.LAZY) { digging_more_for_images(blogList[4]) }.await())
-//            ar_blogList.add(async(start = CoroutineStart.LAZY) { digging_more_for_images_two(blogList[5]) }.await())
-//            ar_blogList.add(async(start = CoroutineStart.LAZY) { digging_more_for_images_two(blogList[6]) }.await())
-//            ar_blogList.add(async(start = CoroutineStart.LAZY) { digging_more_for_images_two(blogList[7]) }.await())
-//            ar_blogList.add(async(start = CoroutineStart.LAZY) { digging_more_for_images_two(blogList[8]) }.await())
-//        ar_blogList.add(async(start = CoroutineStart.LAZY) { digging_more_for_images_two(blogList[9]) }.await())
-        Log.e(TAG,"digging more is completed in $time ms")
-
-//        val two = async(start = CoroutineStart.LAZY) { doSomethingUsefulTwo() }
-//        // some computation
-//            one.start() // start the first one
-//            two.start() // start the second one
-//            blogItem = one.await();
-//            Log.d(TAG,"The answer is ${blogItem.bIsFakeBlog}")
-
-//            if (blogItem.BlogImages?.size!! > 0) {
-//                ar_blogList.add(blogItem)
-//            }
-
-//        }
-
-
-        async {
-
-            coroutineScope.launch(Dispatchers.Main) {
-                //                            LoadingDialog(mContext).dismiss()
-//                dialog.dismiss()
-                blogAdapter?.notifyDataSetChanged();
-            }
-
-        }.await()
-
-
-//        dialog.dismiss()
-//        blogAdapter?.notifyDataSetChanged();
-
-//        val one = async(start = CoroutineStart.LAZY) { doSomethingUsefulOne() }
-//        val two = async(start = CoroutineStart.LAZY) { doSomethingUsefulTwo() }
-//        // some computation
-//        one.start() // start the first one
-//        two.start() // start the second one
-//        Log.d(TAG,"The answer is ${one.await() + two.await()}")
-
     }
 
 }

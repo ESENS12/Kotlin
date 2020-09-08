@@ -128,19 +128,23 @@
 
     <!-- Bottom View Area  -->
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="0dp"
-        android:visibility="visible"
+        android:visibility="gone"
         android:id="@+id/cl_bottomView"
         android:background="@drawable/searchmore_bg_round"
         app:layout_constraintHeight_percent="0.05"
+        app:layout_constraintWidth_percent="0.5"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
         >
-        <Button
+        <TextView
             android:id="@+id/btn_searchMore"
             android:layout_width="match_parent"
             android:text="SEARCH MORE"
-            android:visibility="visible"
+            android:textAlignment="center"
+            android:gravity="center"
             android:layout_height="match_parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
