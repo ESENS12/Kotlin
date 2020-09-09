@@ -32,7 +32,6 @@ class BlogImageAdapter(val mContext: Context, val mData: ArrayList<String>) :
 //        setAnimation(holder.itemView, position);
     }
 
-    //todo animation은 snap 처리 후 적용
 //    private fun setAnimation(viewToAnimate: View, position: Int) {
 //        // If the bound view wasn't previously displayed on screen, it's animated
 //        if (position > lastPosition) {

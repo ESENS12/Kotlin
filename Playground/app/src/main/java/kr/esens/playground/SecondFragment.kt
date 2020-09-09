@@ -9,6 +9,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import kotlinx.android.synthetic.main.fragment_second.*
 
 class SecondFragment : Fragment() {
 
@@ -27,9 +28,10 @@ class SecondFragment : Fragment() {
     * */
     private lateinit var tvLateInit: TextView
 
-    //private static final String TAG = "MyActivity"; 를 아래 처럼 간략화(auto casting type)
-    private val TAG = "SecondFragment"
-
+    //like static
+    companion object{
+        const val TAG = "SecondFragment"
+    }
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?
@@ -43,9 +45,11 @@ class SecondFragment : Fragment() {
         // var 는 mutable , val 은 immutable이라고 알고있는데, lateinit은 var 타입으로(심지어 var로 명시해줌)) 언제든지 초기화를 변경할 수 있다고 하는데..
         // code intelligence에서는 final로 안내하는 이유가..?
 
+        Log.d(TAG,"tvLateInit.text[use ktx] : " + tv_late_init.text);
+
         //not nullable object assign
-        tvLateInit = view.findViewById(R.id.tv_late_init)!!
-        Log.d(TAG,"tvLateInit.text : " + tvLateInit.text);
+//        tvLateInit = view.findViewById(R.id.tv_late_init)!!
+//        Log.d(TAG,"tvLateInit.text : " + tvLateInit.text);
 
         //must not be null exception 발생,
 //        tvLateInit = view.findViewById(R.id.textview_first);

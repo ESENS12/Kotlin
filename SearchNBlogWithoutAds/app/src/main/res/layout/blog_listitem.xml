@@ -49,7 +49,7 @@
         android:textColor="#ffffff"
         android:textStyle="bold"
         android:textSize="18dp"
-        android:text="THIS IS FUCKING ADVERTISE !!"
+        android:text="THIS IS FUCKING ADVERTISEMENT !!"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="@id/recycler_view_parent"

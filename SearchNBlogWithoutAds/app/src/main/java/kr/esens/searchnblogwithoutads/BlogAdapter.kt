@@ -13,13 +13,6 @@ import androidx.recyclerview.widget.LinearSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SnapHelper
 
-
-/*
-
-   TODO 1. 배너 로고가 이미지 view 에서 보이지 않는 경우가 있음.
-
-*/
-
 class BlogAdapter(val mContext: Context, val mData: ArrayList<BlogItem>) :
     RecyclerView.Adapter<BlogAdapter.Holder>() {
 

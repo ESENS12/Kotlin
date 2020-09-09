@@ -4,10 +4,12 @@ import android.app.Dialog
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.os.Handler
 import android.text.Editable
 import android.util.Log
 import android.view.KeyEvent
 import android.view.View
+import android.view.animation.AnimationUtils
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
@@ -15,6 +17,7 @@ import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import okhttp3.ResponseBody
@@ -35,12 +38,15 @@ class MainActivity : AppCompatActivity() {
         private var page = 1
         private var clearHistory = false
         private lateinit var mDialog: Dialog
-    }
 
+        private lateinit var mHandler: Handler
+        private lateinit var mRunnable:Runnable
+    }
 
     //디버깅 모드 (자동검색)
     private val IS_DEBUUGING_MODE = true;
     private var DEBUGGING_SEARCH_QUERY = "노원구 맛집";
+
 
     //시간 측정용
     private val IS_CHECK_TIME_MODE = true;
@@ -85,9 +91,23 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
         mContext = this.applicationContext
         mDialog = LoadingDialog(this)
+        mHandler = Handler()
 
+        swipe.setOnRefreshListener {
+
+            Log.e(TAG,"onRefresh!")
+
+            mRunnable = Runnable {
+                swipe.isRefreshing = false
+            }
+
+            mHandler.postDelayed( mRunnable,5000 )
+        }
+
+        cl_bottomView.visibility = View.GONE
         my_webview.settings.javaScriptEnabled = true
         my_webview.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(
@@ -145,8 +165,10 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        btn_searchMore.setOnClickListener {
-            searchMore();
+        iv_searchmore.setOnClickListener {
+//            val animation = AnimationUtils.loadAnimation(this,R.anim.bounce_anim)
+//            iv_searchmore.startAnimation(animation)
+            searchMore()
         }
 
         btn_search.setOnClickListener {
@@ -183,6 +205,8 @@ class MainActivity : AppCompatActivity() {
             et_searchQuery.text = DEBUGGING_SEARCH_QUERY.toEditable();
             executeSearch(et_searchQuery.text.toString(), true);
         }
+
+
     }
 
     fun String.toEditable(): Editable = Editable.Factory.getInstance().newEditable(this)
@@ -219,7 +243,6 @@ class MainActivity : AppCompatActivity() {
                         response: Response<ResponseBody>
                     ) {
                         val str_res: String = response.body()?.string().toString()
-
 
                         // 여기서 str_res 를 parsing 하고, url까지만 추출 한 다음, url과 index를 가지고 digging more 요청은 subsequential하게 수정
                         val elapsed: Long = measureTimeMillis {
@@ -386,7 +409,6 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
-
 
     fun showNhide_dialog(isShow : Boolean){
         if(isShow){

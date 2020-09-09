@@ -110,6 +110,12 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+           <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+               android:id="@+id/swipe"
+               android:layout_width="match_parent"
+               android:layout_height="match_parent"
+               >
+
 
            <androidx.recyclerview.widget.RecyclerView
                 android:layout_width="match_parent"
@@ -121,6 +127,8 @@
                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 >
            </androidx.recyclerview.widget.RecyclerView>
+
+           </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
        </androidx.constraintlayout.widget.ConstraintLayout>
 
 
@@ -130,22 +138,30 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:visibility="gone"
+        android:visibility="visible"
         android:id="@+id/cl_bottomView"
-        android:background="@drawable/searchmore_bg_round"
-        app:layout_constraintHeight_percent="0.05"
+        app:layout_constraintHeight_percent="0.07"
         app:layout_constraintWidth_percent="0.5"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginBottom="25dp"
         >
-        <TextView
-            android:id="@+id/btn_searchMore"
-            android:layout_width="match_parent"
-            android:text="SEARCH MORE"
-            android:textAlignment="center"
-            android:gravity="center"
-            android:layout_height="match_parent"/>
+        <ImageView
+            android:id="@+id/iv_searchmore"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/arrow_green"
+            >
+
+        </ImageView>
+<!--        <TextView-->
+<!--            android:id="@+id/btn_searchMore"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:text="SEARCH MORE"-->
+<!--            android:textAlignment="center"-->
+<!--            android:gravity="center"-->
+<!--            android:layout_height="match_parent"/>-->
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
