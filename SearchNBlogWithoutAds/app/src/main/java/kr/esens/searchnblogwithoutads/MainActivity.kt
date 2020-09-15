@@ -45,7 +45,7 @@ class MainActivity : AppCompatActivity() {
 
     //디버깅 모드 (자동검색)
     private val IS_DEBUUGING_MODE = true;
-    private var DEBUGGING_SEARCH_QUERY = "노원구 맛집";
+    private var DEBUGGING_SEARCH_QUERY = "하계동스시 신설국";
 
 
     //시간 측정용
@@ -98,12 +98,11 @@ class MainActivity : AppCompatActivity() {
 
         swipe.setOnRefreshListener {
 
-            Log.e(TAG,"onRefresh!")
-
+//            Log.e(TAG,"onRefresh!")
             mRunnable = Runnable {
                 swipe.isRefreshing = false
             }
-
+            executeSearch(et_searchQuery.text.toString(), true);
             mHandler.postDelayed( mRunnable,5000 )
         }
 
@@ -184,9 +183,10 @@ class MainActivity : AppCompatActivity() {
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                     super.onScrollStateChanged(recyclerView, newState)
                     if (!canScrollVertically(1)) {
-                        cl_bottomView.visibility = View.VISIBLE
+//                        cl_bottomView.visibility = View.VISIBLE
+                        searchMore()
                     } else {
-                        cl_bottomView.visibility = View.GONE
+//                        cl_bottomView.visibility = View.GONE
                     }
                 }
             })
@@ -292,7 +292,8 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    @UiThread
+//    @UiThread
+    //todo jsoup 비동기 처리 필요
     private fun getImageUriFromBlog(url: String): Elements? {
         val response: Connection.Response;
 
@@ -307,15 +308,6 @@ class MainActivity : AppCompatActivity() {
         }
         val item = response.parse()
         val img_tag = item.select(nBlog_img_tag);
-
-//        item.select("div.se-section.se-imageStrip-container > a > img[src]")
-        //section + 일반이미지로 되어야하는데..
-
-//        return if (img_tag.size == 0){
-//            item.select("div.se-section.se-section-image > a > img[src]")
-//        }else{
-//            img_tag
-//        }
 
         return img_tag
 
@@ -337,7 +329,7 @@ class MainActivity : AppCompatActivity() {
     suspend fun digging_more_for_images(blogItem: BlogItem): BlogItem {
         val elem_item: Elements? = getImageUriFromBlog(blogItem.BlogUrl);
         if (elem_item != null) {
-            Log.e(TAG, "1__elem_item.length ${elem_item.size}")
+            Log.e(TAG, "1__elem_item.length ${elem_item.size}, url : ${blogItem.BlogUrl}")
         }
         val myClassifier = Classifier()
         elem_item?.forEach {
