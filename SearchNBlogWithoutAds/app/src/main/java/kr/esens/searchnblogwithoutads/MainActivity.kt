@@ -40,7 +40,7 @@ class MainActivity : AppCompatActivity() {
         private lateinit var mDialog: Dialog
 
         private lateinit var mHandler: Handler
-        private lateinit var mRunnable:Runnable
+        private lateinit var mRunnable: Runnable
     }
 
     //디버깅 모드 (자동검색)
@@ -103,7 +103,7 @@ class MainActivity : AppCompatActivity() {
                 swipe.isRefreshing = false
             }
             executeSearch(et_searchQuery.text.toString(), true);
-            mHandler.postDelayed( mRunnable,5000 )
+            mHandler.postDelayed(mRunnable, 5000)
         }
 
         cl_bottomView.visibility = View.GONE
@@ -292,7 +292,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-//    @UiThread
+    //    @UiThread
     //todo jsoup 비동기 처리 필요
     private fun getImageUriFromBlog(url: String): Elements? {
         val response: Connection.Response;
@@ -359,18 +359,18 @@ class MainActivity : AppCompatActivity() {
             var blogItem3: BlogItem;
 
             val time = measureTimeMillis {
-                for(i in 0..2){
+                for (i in 0..2) {
                     val one =
                         async(start = CoroutineStart.LAZY) {
                             digging_more_for_images(blogList[i])
                         }
                     val two =
                         async(start = CoroutineStart.LAZY) {
-                            digging_more_for_images(blogList[i+3])
+                            digging_more_for_images(blogList[i + 3])
                         }
                     val three =
                         async(start = CoroutineStart.LAZY) {
-                            digging_more_for_images(blogList[i+6])
+                            digging_more_for_images(blogList[i + 6])
                         }
 
                     one.start()
@@ -402,10 +402,10 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    fun showNhide_dialog(isShow : Boolean){
-        if(isShow){
+    fun showNhide_dialog(isShow: Boolean) {
+        if (isShow) {
             mDialog.show()
-        }else{
+        } else {
             mDialog.hide()
         }
     }

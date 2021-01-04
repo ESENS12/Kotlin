@@ -5,7 +5,7 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 
-class LoadingDialog (context: Context) : Dialog(context) {
+class LoadingDialog(context: Context) : Dialog(context) {
 
     init {
         setCanceledOnTouchOutside(false)

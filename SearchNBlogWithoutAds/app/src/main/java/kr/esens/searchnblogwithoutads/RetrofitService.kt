@@ -13,12 +13,12 @@ interface RetrofitService {
     @GET("search.naver")
     fun requestBlogList(
         @Query("query") query: String,
-        @Query("tab_pge") tab_pge: String="tab_pge",
-        @Query("srchby") srchby: String="all",
+        @Query("tab_pge") tab_pge: String = "tab_pge",
+        @Query("srchby") srchby: String = "all",
         @Query("st") st: String,
-        @Query("display") display: Int=8,
-        @Query("where") where: String="post",
-        @Query("start") start: Int=1
+        @Query("display") display: Int = 8,
+        @Query("where") where: String = "post",
+        @Query("start") start: Int = 1
     ): Call<ResponseBody>
 
 
@@ -26,10 +26,10 @@ interface RetrofitService {
     @GET("{sb}/{query}/{sub}")
     @Streaming  //용량이 작을때는 skip 가능
     fun requestSearchImage(
-        @Path ("sb") sb:String="MjAyMDA2MjZfMTcg",
+        @Path("sb") sb: String = "MjAyMDA2MjZfMTcg",
         @Path("query") query: String,
-        @Path("sub") sub:String,
-        @Query("type") type: String="w800"
+        @Path("sub") sub: String,
+        @Query("type") type: String = "w800"
 
     ): Call<ResponseBody>
 }

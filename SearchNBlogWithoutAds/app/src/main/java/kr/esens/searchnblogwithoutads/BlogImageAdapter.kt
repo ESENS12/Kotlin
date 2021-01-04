@@ -28,7 +28,7 @@ class BlogImageAdapter(val mContext: Context, val mData: ArrayList<String>) :
     }
 
     override fun onBindViewHolder(holder: Holder, position: Int) {
-        holder.bind(mData,position, mContext)
+        holder.bind(mData, position, mContext)
 //        setAnimation(holder.itemView, position);
     }
 
@@ -52,7 +52,7 @@ class BlogImageAdapter(val mContext: Context, val mData: ArrayList<String>) :
         val iv_thumbnail = itemView?.findViewById<ImageView>(R.id.iv_thumbnail)
 //        val tv_index = itemView?.findViewById<TextView>(R.id.tv_index)
 
-        fun bind (list: ArrayList<String>, position: Int,context: Context) {
+        fun bind(list: ArrayList<String>, position: Int, context: Context) {
 //            Log.e(TAG,"iv_thumbnail height : ${iv_thumbnail?.height} , width : ${iv_thumbnail?.width}")
             if (iv_thumbnail != null) {
 //                var requestOptions = RequestOptions()

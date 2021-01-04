@@ -30,6 +30,7 @@ class CirclePagerIndicatorDecoration : RecyclerView.ItemDecoration() {
      * Indicator width.
      */
     private val mIndicatorItemLength = DP * 2
+
     /**
      * Padding between indicators.
      */
@@ -60,7 +61,7 @@ class CirclePagerIndicatorDecoration : RecyclerView.ItemDecoration() {
         var indicatorTotalWidth = totalLength + paddingBetweenItems
 
         //todo  change it scrollable , define maximum width [device with / 2], horizontal align to center
-        if(indicatorTotalWidth > 600){
+        if (indicatorTotalWidth > 600) {
             indicatorTotalWidth = 400f;
         }
 
@@ -92,7 +93,12 @@ class CirclePagerIndicatorDecoration : RecyclerView.ItemDecoration() {
         drawHighlights(c, indicatorStartX, indicatorPosY, activePosition, progress, itemCount)
     }
 
-    private fun drawInactiveIndicators(c: Canvas, indicatorStartX: Float, indicatorPosY: Float, itemCount: Int) {
+    private fun drawInactiveIndicators(
+        c: Canvas,
+        indicatorStartX: Float,
+        indicatorPosY: Float,
+        itemCount: Int
+    ) {
         mPaint.color = colorInactive
 
         // width of item indicator including padding
@@ -103,7 +109,7 @@ class CirclePagerIndicatorDecoration : RecyclerView.ItemDecoration() {
             // draw the line for every item
             c.drawLine(start, indicatorPosY, start + mIndicatorItemLength, indicatorPosY, mPaint)
             start += itemWidth
-            if (i>10){
+            if (i > 10) {
                 break;
             }
         }
@@ -151,7 +157,12 @@ class CirclePagerIndicatorDecoration : RecyclerView.ItemDecoration() {
         }
     }
 
-    override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State) {
+    override fun getItemOffsets(
+        outRect: Rect,
+        view: View,
+        parent: RecyclerView,
+        state: RecyclerView.State
+    ) {
         super.getItemOffsets(outRect, view, parent, state)
         outRect.bottom = mIndicatorHeight
     }

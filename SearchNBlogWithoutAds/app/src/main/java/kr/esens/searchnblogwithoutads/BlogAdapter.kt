@@ -16,12 +16,12 @@ import androidx.recyclerview.widget.SnapHelper
 class BlogAdapter(val mContext: Context, val mData: ArrayList<BlogItem>) :
     RecyclerView.Adapter<BlogAdapter.Holder>() {
 
-    interface OnItemClickListener{
-        fun onItemClick(v:View, position:Int);
+    interface OnItemClickListener {
+        fun onItemClick(v: View, position: Int);
     }
 
     private var blogAdapter: BlogImageAdapter? = null;
-    private var onItemClickListener : OnItemClickListener? = null;
+    private var onItemClickListener: OnItemClickListener? = null;
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
         val view = LayoutInflater.from(mContext).inflate(R.layout.blog_listitem, parent, false)
@@ -33,7 +33,7 @@ class BlogAdapter(val mContext: Context, val mData: ArrayList<BlogItem>) :
         return mData.size
     }
 
-    fun setOnItemClickListener(listener: OnItemClickListener){
+    fun setOnItemClickListener(listener: OnItemClickListener) {
         this.onItemClickListener = listener;
     }
 
@@ -42,7 +42,7 @@ class BlogAdapter(val mContext: Context, val mData: ArrayList<BlogItem>) :
         holder.bind(mData, position, mContext)
     }
 
-    inner class Holder(itemView: View) : RecyclerView.ViewHolder(itemView)  {
+    inner class Holder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var recyclerView = itemView.findViewById<RecyclerView>(R.id.recycler_view_parent);
         var tv_title = itemView.findViewById<TextView>(R.id.tv_title)
         var tv_fake = itemView.findViewById<TextView>(R.id.tv_fake);
@@ -50,17 +50,19 @@ class BlogAdapter(val mContext: Context, val mData: ArrayList<BlogItem>) :
 //        val iv_thumbnail = itemView?.findViewById<ImageView>(R.id.iv_thumbnail)
 //        val tv_index = itemView?.findViewById<TextView>(R.id.tv_index)
 
-        fun bind (
+        fun bind(
             list: ArrayList<BlogItem>, position: Int,
-            context: Context) {
+            context: Context
+        ) {
 
-            blogAdapter = list[position].BlogImages?.let {BlogImageAdapter(context, it)};
-            val mLinearLayoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL,false);
+            blogAdapter = list[position].BlogImages?.let { BlogImageAdapter(context, it) };
+            val mLinearLayoutManager =
+                LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
 
             tv_title.setOnClickListener {
-                if(adapterPosition != RecyclerView.NO_POSITION){
-                    if(onItemClickListener != null){
-                        onItemClickListener!!.onItemClick(it,adapterPosition)
+                if (adapterPosition != RecyclerView.NO_POSITION) {
+                    if (onItemClickListener != null) {
+                        onItemClickListener!!.onItemClick(it, adapterPosition)
                     }
                 }
             }
@@ -70,16 +72,16 @@ class BlogAdapter(val mContext: Context, val mData: ArrayList<BlogItem>) :
                 this.layoutManager = mLinearLayoutManager
                 this.isNestedScrollingEnabled = true
                 this.setHasFixedSize(true)
-                if(this.itemDecorationCount == 0){
+                if (this.itemDecorationCount == 0) {
                     this.addItemDecoration(CirclePagerIndicatorDecoration())
                 }
             }
 
             snapHelper.attachToRecyclerView(recyclerView);
 
-            if(mData[position].bIsFakeBlog){
+            if (mData[position].bIsFakeBlog) {
                 tv_fake.visibility = View.VISIBLE
-            }else{
+            } else {
                 tv_fake.visibility = View.GONE
             }
 
