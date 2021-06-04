@@ -29,34 +29,16 @@ class BlogImageAdapter(val mContext: Context, val mData: ArrayList<String>) :
 
     override fun onBindViewHolder(holder: Holder, position: Int) {
         holder.bind(mData, position, mContext)
-//        setAnimation(holder.itemView, position);
     }
-
-//    private fun setAnimation(viewToAnimate: View, position: Int) {
-//        // If the bound view wasn't previously displayed on screen, it's animated
-//        if (position > lastPosition) {
-//            val animation =
-//                AnimationUtils.loadAnimation(mContext, R.anim.item_animation_horizontal)
-//            viewToAnimate.startAnimation(animation)
-//            lastPosition = position
-//        }
-//    }
-
-//    override fun onViewDetachedFromWindow(holder: Holder) {
-//        holder.clearAnimation()
-//    }
 
     inner class Holder(itemView: View?) : RecyclerView.ViewHolder(itemView!!) {
 
 
         val iv_thumbnail = itemView?.findViewById<ImageView>(R.id.iv_thumbnail)
-//        val tv_index = itemView?.findViewById<TextView>(R.id.tv_index)
 
         fun bind(list: ArrayList<String>, position: Int, context: Context) {
-//            Log.e(TAG,"iv_thumbnail height : ${iv_thumbnail?.height} , width : ${iv_thumbnail?.width}")
+
             if (iv_thumbnail != null) {
-//                var requestOptions = RequestOptions()
-//                requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(16))
                 Glide.with(context)
                     .load(list[position])
                     .transform(CenterCrop(), RoundedCorners(45))
@@ -65,12 +47,7 @@ class BlogImageAdapter(val mContext: Context, val mData: ArrayList<String>) :
                     //                .error(R.drawable.image_not_found)
                     .into(iv_thumbnail)
             }
-//            tv_index?.text = "$position"
-
         }
 
-//        fun clearAnimation() {
-//            itemView.clearAnimation()
-//        }
     }
 }

@@ -45,7 +45,7 @@ class MainActivity : AppCompatActivity() {
 
     //디버깅 모드 (자동검색)
     private val IS_DEBUUGING_MODE = true;
-    private var DEBUGGING_SEARCH_QUERY = "하계동스시 신설국";
+    private var DEBUGGING_SEARCH_QUERY = "을지로 맛집";
 
 
     //시간 측정용
