@@ -243,12 +243,15 @@ class MainActivity : AppCompatActivity() {
                         response: Response<ResponseBody>
                     ) {
                         val str_res: String = response.body()?.string().toString()
-
+                        if(str_res.equals("")){
+                            Log.e(TAG,"str_res is null");
+                            return;
+                        }
                         // 여기서 str_res 를 parsing 하고, url까지만 추출 한 다음, url과 index를 가지고 digging more 요청은 subsequential하게 수정
                         val elapsed: Long = measureTimeMillis {
                             val res: Document? = Jsoup.parse(str_res)
-                            val elem: Elements? = res?.select("a.sh_blog_title")
-                            var blogItemList = Array<BlogItem>(10) { BlogItem() };
+                            val elem: Elements? = res?.select("div.total_wrap a.api_txt_lines");
+                            var blogItemList = Array<BlogItem>(30) { BlogItem() };
 //                            Log.e(TAG,"elem.size : ${elem?.size}")
 
                             elem?.forEachIndexed() { index, it ->
@@ -258,12 +261,12 @@ class MainActivity : AppCompatActivity() {
                                 val blog_url = parseBlogUri(it.attr("href"))
                                 blogItem.BlogUrl = blog_url;
                                 blogItem.BlogImages = ArrayList<String>();
-                                blogItem.PostTitle = it.attr("title");
+                                blogItem.PostTitle = it.text()
+
+//                                Log.d(TAG, "blog_url : $blog_url");
+//                                Log.d(TAG, "PostTitle[raw] : " + it.text());
 
                                 blogItemList[index] = (blogItem);
-
-                                Log.d(TAG, "blog_url : $blog_url")
-
                             }
 
                             basic_sequential(blogItemList);
@@ -293,7 +296,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     //    @UiThread
-    //todo jsoup 비동기 처리 필요
     private fun getImageUriFromBlog(url: String): Elements? {
         val response: Connection.Response;
 
