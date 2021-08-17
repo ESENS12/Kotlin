@@ -46,8 +46,8 @@ class MainActivity : AppCompatActivity() {
     //디버깅 모드 (자동검색)
     private val IS_DEBUUGING_MODE = true;
     private var DEBUGGING_SEARCH_QUERY = "을지로 맛집";
-
-
+    private var requestSearchMore = false;
+    private var beforeSrollState = 0;
     //시간 측정용
     private val IS_CHECK_TIME_MODE = true;
 
@@ -55,9 +55,7 @@ class MainActivity : AppCompatActivity() {
         "div.se-module.se-module-image > a > img[src], div.se-section.se-section-image > a > img[src], div.se-imageStrip-container > a > img[src]" // naver blog 이미지 태그
     private val parentJob = Job()
     private val coroutineScope = CoroutineScope(Dispatchers.Main + parentJob)
-    private var ar_blogimgList = ArrayList<String>();
     private var ar_blogList = ArrayList<BlogItem>();
-    private var ar_blogUrlList = ArrayList<String>();
     private var blogAdapter: BlogAdapter? = null;
     private var mBackWait: Long = 0
     private var loadingFinished = true
@@ -67,13 +65,10 @@ class MainActivity : AppCompatActivity() {
 
         // 뒤로가기 버튼 클릭
         if (my_webview!!.visibility == View.VISIBLE) {
-//            val list = my_webview.copyBackForwardList();
-
             if (my_webview.canGoBackOrForward(-2)) {
                 my_webview.goBack();
                 return
             }
-
             clearHistory = true
             my_webview.visibility = View.GONE;
             my_webview.loadUrl("about:blank");
@@ -98,7 +93,6 @@ class MainActivity : AppCompatActivity() {
 
         swipe.setOnRefreshListener {
 
-//            Log.e(TAG,"onRefresh!")
             mRunnable = Runnable {
                 swipe.isRefreshing = false
             }
@@ -153,8 +147,6 @@ class MainActivity : AppCompatActivity() {
         val mLinearLayoutManager =
             LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false);
 
-//        my_webview.webViewClient = WebViewClient()
-
         blogAdapter = BlogAdapter(mContext, ar_blogList);
         blogAdapter!!.setOnItemClickListener(object : BlogAdapter.OnItemClickListener {
             override fun onItemClick(v: View, position: Int) {
@@ -164,12 +156,13 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        iv_searchmore.setOnClickListener {
-//            val animation = AnimationUtils.loadAnimation(this,R.anim.bounce_anim)
-//            iv_searchmore.startAnimation(animation)
-            searchMore()
-        }
+        //not used.. 자동 검색으로 변경
+        //더보기 버튼 클릭
+//        iv_searchmore.setOnClickListener {
+//            searchMore()
+//        }
 
+        //검색 버튼 클릭
         btn_search.setOnClickListener {
             executeSearch(et_searchQuery.text.toString(), true)
         }
@@ -182,11 +175,14 @@ class MainActivity : AppCompatActivity() {
             this.addOnScrollListener(object : RecyclerView.OnScrollListener() {
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                     super.onScrollStateChanged(recyclerView, newState)
+                    Log.e(TAG,"newState : $newState")
                     if (!canScrollVertically(1)) {
-//                        cl_bottomView.visibility = View.VISIBLE
-                        searchMore()
-                    } else {
-//                        cl_bottomView.visibility = View.GONE
+                        if(requestSearchMore){
+                            searchMore()
+                        }
+                        if(newState == 0){
+                            requestSearchMore = !requestSearchMore;
+                        }
                     }
                 }
             })
@@ -205,8 +201,6 @@ class MainActivity : AppCompatActivity() {
             et_searchQuery.text = DEBUGGING_SEARCH_QUERY.toEditable();
             executeSearch(et_searchQuery.text.toString(), true);
         }
-
-
     }
 
     fun String.toEditable(): Editable = Editable.Factory.getInstance().newEditable(this)
@@ -243,8 +237,8 @@ class MainActivity : AppCompatActivity() {
                         response: Response<ResponseBody>
                     ) {
                         val str_res: String = response.body()?.string().toString()
-                        if(str_res.equals("")){
-                            Log.e(TAG,"str_res is null");
+                        if (str_res.equals("")) {
+                            Log.e(TAG, "str_res is null");
                             return;
                         }
                         // 여기서 str_res 를 parsing 하고, url까지만 추출 한 다음, url과 index를 가지고 digging more 요청은 subsequential하게 수정
@@ -279,20 +273,7 @@ class MainActivity : AppCompatActivity() {
                     }
 
                 })
-
-            async {
-
-                coroutineScope.launch(Dispatchers.Main) {
-                    //                            LoadingDialog(mContext).dismiss()
-//                    dialog.dismiss()
-//                                    blogAdapter?.notifyDataSetChanged();
-                }
-
-            }.await()
-
         }
-
-
     }
 
     //    @UiThread
@@ -315,7 +296,6 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    //blog.me로 끝나는 naver blog url을 blog.naver.com으로 변경해줘야함
     private fun parseBlogUri(url: String): String {
         if (url.indexOf("blog.me") > -1) {
             val nickName = url.substring(url.indexOf("/") + 2, url.indexOf("."))
@@ -327,7 +307,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
     suspend fun digging_more_for_images(blogItem: BlogItem): BlogItem {
         val elem_item: Elements? = getImageUriFromBlog(blogItem.BlogUrl);
         if (elem_item != null) {
@@ -335,10 +314,6 @@ class MainActivity : AppCompatActivity() {
         }
         val myClassifier = Classifier()
         elem_item?.forEach {
-
-            if (it.attr("src").contains("type=w966")) {
-                Log.e(TAG, "find w966!");
-            }
 
             val bIsFakeBlog = myClassifier.Classification(it.attr("src"))
 
@@ -356,36 +331,54 @@ class MainActivity : AppCompatActivity() {
     fun basic_sequential(blogList: Array<BlogItem>) = runBlocking {
         launch(Dispatchers.IO) {
 
-            var blogItem1: BlogItem;
-            var blogItem2: BlogItem;
-            var blogItem3: BlogItem;
+            var blogItem1: BlogItem
+            var blogItem2: BlogItem
+            var blogItem3: BlogItem
+            var blogItem4: BlogItem
+            var blogItem5: BlogItem
 
             val time = measureTimeMillis {
-                for (i in 0..2) {
+                for (i in 1..2) {
                     val one =
                         async(start = CoroutineStart.LAZY) {
                             digging_more_for_images(blogList[i])
                         }
                     val two =
                         async(start = CoroutineStart.LAZY) {
-                            digging_more_for_images(blogList[i + 3])
+                            digging_more_for_images(blogList[i+2])
                         }
                     val three =
                         async(start = CoroutineStart.LAZY) {
-                            digging_more_for_images(blogList[i + 6])
+                            digging_more_for_images(blogList[i+4])
+                        }
+
+                    val four =
+                        async(start = CoroutineStart.LAZY) {
+                            digging_more_for_images(blogList[i+6])
+                        }
+
+                    val five =
+                        async(start = CoroutineStart.LAZY) {
+                            digging_more_for_images(blogList[i+8])
                         }
 
                     one.start()
                     two.start()
                     three.start()
+                    four.start()
+                    five.start()
 
                     blogItem1 = one.await()
                     blogItem2 = two.await()
                     blogItem3 = three.await()
+                    blogItem4 = four.await()
+                    blogItem5 = five.await()
 
                     ar_blogList.add(blogItem1)
                     ar_blogList.add(blogItem2)
                     ar_blogList.add(blogItem3)
+                    ar_blogList.add(blogItem4)
+                    ar_blogList.add(blogItem5)
                 }
             }
 
@@ -404,6 +397,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    @UiThread
     fun showNhide_dialog(isShow: Boolean) {
         if (isShow) {
             mDialog.show()
