@@ -15,25 +15,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-//        runBlocking {
-//            //GlobalScope -> lifetime 이 끝날때까지 동작하는 전역 스코프
-//            var job = GlobalScope.launch{
-//                delay(1000L)
-//                Log.d(TAG,"World!")
-//            }
-//
-//            Log.d(TAG,"Hello,")
-//            job.join()
-//        }
-        //launch와 같은 코루틴 빌더임
-//        runBlocking {
-//          delay(2000L)
-//        }
-
-//        Thread.sleep(2000L)
-
-        //        main()
-
+//        main()
 //        scopeTest()
 //        suspended_main();
 //        cancel_main()
@@ -225,29 +207,33 @@ class MainActivity : AppCompatActivity() {
 
 
     suspend fun doSomethingUsefulOne(): Int{
-        delay(1000L)
+        delay(3000L)
         return 13
     }
 
     suspend fun doSomethingUsefulTwo(): Int{
-        delay(3000L)
+        delay(4000L)
         return 29
     }
 
     fun basic_sequential() = runBlocking {
-//        val time = measureTimeMillis {
-//            val one = doSomethingUsefulOne()
-//            val two = doSomethingUsefulTwo()
-//            Log.d(TAG,"The answer is ${one + two}")
-//        }
-//        Log.d(TAG,"Completed in $time ms")
+        Log.e(TAG,"start --")
+        val time = measureTimeMillis {
+            // one + two 만큼 실행
+            val one = doSomethingUsefulOne()
+            val two = doSomethingUsefulTwo()
+            Log.d(TAG,"The answer is ${one + two}")
+        }
 
+        Log.e(TAG,"Completed in $time ms")
+        Log.e(TAG,"start ---async");
+        // 동시 실행하므로 one, two 중 오래 걸리는 시간만큼
         val one = async(start = CoroutineStart.LAZY) { doSomethingUsefulOne() }
         val two = async(start = CoroutineStart.LAZY) { doSomethingUsefulTwo() }
         // some computation
         one.start() // start the first one
         two.start() // start the second one
-        Log.d(TAG,"The answer is ${one.await() + two.await()}")
+        Log.e(TAG,"The answer is ${one.await() + two.await()}")
 
     }
 
