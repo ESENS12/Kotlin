@@ -20,5 +20,9 @@ class MainActivity : AppCompatActivity() {
         binding.lifecycleOwner = this;
         binding.viewModel = model;
         btn_increase = findViewById(R.id.fab_main);
+        // main activity에서 간섭할 수도 있다.
+        btn_increase.setOnClickListener {
+            model.increase()
+        }
     }
 }
