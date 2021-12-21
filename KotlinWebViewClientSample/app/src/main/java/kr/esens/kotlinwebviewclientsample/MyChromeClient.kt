@@ -9,11 +9,13 @@ import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.*
+import androidx.browser.customtabs.CustomTabsIntent
 
 class MyChromeClient : WebChromeClient() {
 
     private val TAG = "MyChromeClient"
     lateinit var mContext : Context
+    lateinit var urlString : String
 
     override fun onProgressChanged(view: WebView?, newProgress: Int) {
         Log.d(TAG,"onProgressChanged called : ${newProgress}")
@@ -60,12 +62,20 @@ class MyChromeClient : WebChromeClient() {
         resultMsg: Message?
     ): Boolean {
         Log.d(TAG,"onCreateWindow called")
+        val builder = CustomTabsIntent.Builder()
+        builder.setShowTitle(false)
+        builder.setShareState(CustomTabsIntent.SHARE_STATE_OFF)
+        builder.setInstantAppsEnabled(true)
+        val customBuilder  = builder.build();
+
+        val request_uri = Uri.parse(urlString)
+        customBuilder.launchUrl(mContext, request_uri)
 //        val newWebView = WebView(MainActivity@mContext).apply {
 //            settings.javaScriptEnabled = true
 //        }
-
+//
 //        val dialog = Dialog(MainActivity@mContext).apply {
-//            setContentView(view!!)
+//            setContentView(newWebView)
 //            window!!.attributes.width = ViewGroup.LayoutParams.WRAP_CONTENT
 //            window!!.attributes.height = ViewGroup.LayoutParams.WRAP_CONTENT
 //            show()
@@ -75,9 +85,8 @@ class MyChromeClient : WebChromeClient() {
 //                dialog.dismiss()
 //            }
 //        }
-
-        (resultMsg?.obj as WebView.WebViewTransport).webView = view
-        resultMsg.sendToTarget()
+//        (resultMsg?.obsj as WebView.WebViewTransport).webView = newWebView
+//        resultMsg.sendToTarget()
         return true
 //        return super.onCreateWindow(view, isDialog, isUserGesture, resultMsg)
     }

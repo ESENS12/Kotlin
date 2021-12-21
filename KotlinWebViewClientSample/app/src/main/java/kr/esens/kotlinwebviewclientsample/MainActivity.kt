@@ -18,7 +18,7 @@ class MainActivity : AppCompatActivity() {
 
     private val TAG = "MainActivity"
     lateinit var mContext : Context
-    private val STR_URL = ""
+    private val STR_URL = "https://betafatosmap-web.fatos.biz/signup"
     companion object {
         lateinit var mWebView : WebView
     }
@@ -36,8 +36,8 @@ class MainActivity : AppCompatActivity() {
             webViewClient = myWebViewClient()
             webChromeClient = myChromeClient
             settings.javaScriptEnabled = true
-            settings.userAgentString = "Mozilla/5.0 (Linux; Android 4.1.1; Galaxy Nexus Build/JRO03C) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166 Mobile Safari/535.19"
-            settings.setSupportMultipleWindows(false)
+//            settings.userAgentString = "Mozilla/5.0 (Linux; Android 4.1.1; MOGOS Build/JRO03C) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166 Mobile Safari/535.19"
+            settings.setSupportMultipleWindows(true)
         }
 
     }
