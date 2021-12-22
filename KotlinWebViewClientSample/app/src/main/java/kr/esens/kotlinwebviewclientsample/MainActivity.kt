@@ -4,21 +4,25 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.net.Uri
 import android.net.http.SslError
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Message
+import android.util.Log
 import android.view.KeyEvent
 import android.webkit.*
 import android.widget.Toast
+import androidx.browser.customtabs.CustomTabsIntent
 import java.io.IOException
 
 class MainActivity : AppCompatActivity() {
 
     private val TAG = "MainActivity"
     lateinit var mContext : Context
-    private val STR_URL = "https://betafatosmap-web.fatos.biz/signup"
+    private val STR_URL = ""
+    private var mCustomTabs : CustomTabsIntent? = null;
     companion object {
         lateinit var mWebView : WebView
     }
@@ -58,6 +62,19 @@ class MainActivity : AppCompatActivity() {
             view: WebView?,
             request: WebResourceRequest?
         ): Boolean {
+            var request_url_string:String = request?.url.toString()
+            Log.e(TAG,"shouldOverrideUrlLoading called $request_url_string")
+                if(mCustomTabs == null){
+                    var builder = CustomTabsIntent.Builder()
+                    builder.setShowTitle(false)
+                    builder.setShareState(CustomTabsIntent.SHARE_STATE_OFF)
+                    builder.setInstantAppsEnabled(true)
+                    builder.setUrlBarHidingEnabled(true)
+                    mCustomTabs = builder.build();
+                }
+
+                val request_uri = Uri.parse(request?.url.toString())
+                mCustomTabs?.launchUrl(mContext, request_uri)
             return super.shouldOverrideUrlLoading(view, request)
         }
 
