@@ -49,4 +49,8 @@ class ObservableFieldActivity : AppCompatActivity() {
     fun onLike(view: View) {
         observableFieldProfile.likes.set(observableFieldProfile.likes.get() + 1)
     }
+
+    fun onDisLike(view: View) {
+        observableFieldProfile.likes.set(observableFieldProfile.likes.get() - 1)
+    }
 }

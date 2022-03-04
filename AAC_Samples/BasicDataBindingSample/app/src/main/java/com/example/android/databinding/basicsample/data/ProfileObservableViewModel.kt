@@ -52,6 +52,9 @@ class ProfileLiveDataViewModel : ViewModel() {
     fun onLike() {
         _likes.value = (_likes.value ?: 0) + 1
     }
+    fun onDisLike(){
+        _likes.value = (_likes.value ?: 0) - 1
+    }
 }
 
 /**

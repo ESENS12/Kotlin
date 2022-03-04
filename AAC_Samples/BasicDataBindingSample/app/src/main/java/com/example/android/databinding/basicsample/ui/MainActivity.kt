@@ -43,8 +43,5 @@ class MainActivity : AppCompatActivity() {
         binding.viewmodelActivityButton.setOnClickListener {
             startActivity(Intent(this, ViewModelActivity::class.java))
         }
-        binding.btnActivityDislike.setOnClickListener {
-            startActivity(Intent(this, ObDislikeActivity::class.java))
-        }
     }
 }

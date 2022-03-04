@@ -44,7 +44,7 @@ class ViewModelActivity : AppCompatActivity() {
         // Obtain binding
         val binding: ViewmodelProfileBinding =
                 DataBindingUtil.setContentView(this, R.layout.viewmodel_profile)
-
+ㅁ
         // Bind layout with ViewModel
         binding.viewmodel = viewModel
 
