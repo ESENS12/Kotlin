@@ -10,6 +10,9 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven {
+            url 'https://maven.tomtom.com:8443/nexus/content/repositories/releases/'
+        }
     }
 }
 rootProject.name = "tomtom_sdk_example"
