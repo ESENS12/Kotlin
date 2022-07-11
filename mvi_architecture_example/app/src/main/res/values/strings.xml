@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">mvi_architecture_example</string>
+    <string name="fetch_user">Fetch User</string>
 </resources>
