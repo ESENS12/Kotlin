@@ -5,6 +5,7 @@ import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.EditText
 import kr.esens.appwidgetexample.databinding.SmokeWidgetConfigureBinding
@@ -15,21 +16,18 @@ import kr.esens.appwidgetexample.databinding.SmokeWidgetConfigureBinding
 class SmokeWidgetConfigureActivity : Activity() {
     private var appWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID
     private lateinit var appWidgetText: EditText
-    private var onClickListener = View.OnClickListener {
-        val context = this@SmokeWidgetConfigureActivity
+    private var onclicklistener = view.onclicklistener {
+        val context = this@smokewidgetconfigureactivity
 
-        // When the button is clicked, store the string locally
-        val widgetText = appWidgetText.text.toString()
-        saveTitlePref(context, appWidgetId, widgetText)
+        val widgettext = appwidgettext.text.tostring()
+        savetitlepref(context, appwidgetid, widgettext)
 
-        // It is the responsibility of the configuration activity to update the app widget
-        val appWidgetManager = AppWidgetManager.getInstance(context)
-        updateAppWidget(context, appWidgetManager, appWidgetId)
+        val appwidgetmanager = appwidgetmanager.getinstance(context)
+        updateappwidget(context, appwidgetmanager, appwidgetid)
 
-        // Make sure we pass back the original appWidgetId
-        val resultValue = Intent()
-        resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
-        setResult(RESULT_OK, resultValue)
+        val resultvalue = intent()
+        resultvalue.putextra(appwidgetmanager.extra_appwidget_id, appwidgetid)
+        setresult(result_ok, resultvalue)
         finish()
     }
     private lateinit var binding: SmokeWidgetConfigureBinding
@@ -69,6 +67,8 @@ class SmokeWidgetConfigureActivity : Activity() {
 
 private const val PREFS_NAME = "kr.esens.appwidgetexample.SmokeWidget"
 private const val PREF_PREFIX_KEY = "appwidget_"
+private val TAG = SmokeWidgetConfigureActivity::class.simpleName
+
 
 // Write the prefix to the SharedPreferences object for this widget
 internal fun saveTitlePref(context: Context, appWidgetId: Int, text: String) {
@@ -83,6 +83,19 @@ internal fun loadTitlePref(context: Context, appWidgetId: Int): String {
     val prefs = context.getSharedPreferences(PREFS_NAME, 0)
     val titleValue = prefs.getString(PREF_PREFIX_KEY + appWidgetId, null)
     return titleValue ?: context.getString(R.string.appwidget_text)
+}
+
+internal fun loadValuePref(context: Context): Int {
+    val prefs = context.getSharedPreferences(PREFS_NAME, 0)
+    val intValue = prefs.getInt(PREF_PREFIX_KEY + "SMOKE_VALUE", 0)
+    return intValue ?: 0
+}
+
+
+internal fun saveValuePref(context: Context, nValue: Int) {
+    val prefs = context.getSharedPreferences(PREFS_NAME, 0).edit()
+    prefs.putInt(PREF_PREFIX_KEY + "SMOKE_VALUE", nValue)
+    prefs.apply()
 }
 
 internal fun deleteTitlePref(context: Context, appWidgetId: Int) {

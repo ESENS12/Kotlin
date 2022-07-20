@@ -1,8 +1,12 @@
 package kr.esens.appwidgetexample
 
+import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
+import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
+import android.util.Log
 import android.widget.RemoteViews
 
 /**
@@ -10,6 +14,7 @@ import android.widget.RemoteViews
  * App Widget Configuration implemented in [SmokeWidgetConfigureActivity]
  */
 class SmokeWidget : AppWidgetProvider() {
+
     override fun onUpdate(
         context: Context,
         appWidgetManager: AppWidgetManager,
@@ -37,6 +42,14 @@ class SmokeWidget : AppWidgetProvider() {
     }
 }
 
+private fun getPendingIntent(context: Context, value: Int): PendingIntent {
+
+    val intent = Intent(context, SmokeWidget::class.java)
+    intent.action = Constants.SMOKE_ACTION_ID
+    intent.putExtra(Constants.EXTRA_ID, value)
+    return PendingIntent.getBroadcast(context, value, intent, 0)
+}
+
 internal fun updateAppWidget(
     context: Context,
     appWidgetManager: AppWidgetManager,
@@ -47,6 +60,8 @@ internal fun updateAppWidget(
     val views = RemoteViews(context.packageName, R.layout.smoke_widget)
     views.setTextViewText(R.id.appwidget_text, widgetText)
 
-    // Instruct the widget manager to update the widget
+//    views.setOnClickPendingIntent(R.id.btn_clicks,
+//        getPendingIntent(context, loadValuePref(context)))
+
     appWidgetManager.updateAppWidget(appWidgetId, views)
 }
