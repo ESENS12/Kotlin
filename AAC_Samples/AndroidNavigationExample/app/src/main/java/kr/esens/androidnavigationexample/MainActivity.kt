@@ -60,7 +60,7 @@ class MainActivity : AppCompatActivity() {
             val dest: String = try {
                 resources.getResourceName(destination.id)
             } catch (e: Resources.NotFoundException) {
-                Integer.toString(destination.id)
+                destination.id.toString()
             }
 
             Toast.makeText(this@MainActivity, "Navigated to $dest",

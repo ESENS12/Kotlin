@@ -4,8 +4,9 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="app/src/main/res/drawable/ic_android.xml" value="0.2525" />
-        <entry key="app/src/main/res/layout-h470dp/navigation_activity.xml" value="0.24947916666666667" />
+        <entry key="app/src/main/res/layout-h470dp/navigation_activity.xml" value="0.1" />
         <entry key="app/src/main/res/layout/deep_link_appwidget.xml" value="0.24947916666666667" />
+        <entry key="app/src/main/res/layout/home_fragment.xml" value="0.2390625" />
         <entry key="app/src/main/res/layout/navigation_activity.xml" value="0.4315315315315315" />
         <entry key="app/src/main/res/menu/main_menu.xml" value="0.24947916666666667" />
       </map>
