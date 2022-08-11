@@ -1,7 +1,10 @@
 package kr.esens.expandablerecyclerviewexample
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
@@ -9,7 +12,8 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var personList: List<Person>
     private lateinit var adapter: ExpandableAdapter
-
+    private val TAG = MainActivity::class.simpleName
+    val mainHandler = Handler(Looper.getMainLooper())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,6 +27,14 @@ class MainActivity : AppCompatActivity() {
         recyclerView.setHasFixedSize(true)
         recyclerView.layoutManager = LinearLayoutManager(this)
         adapter = ExpandableAdapter(personList)
+        var layoutManager = recyclerView.layoutManager as LinearLayoutManager
+
+        adapter.setOnclickListener {
+                person, index ->
+            mainHandler.postDelayed({
+                layoutManager.scrollToPositionWithOffset(index,0)
+            },100)
+        }
         recyclerView.adapter = adapter
     }
 

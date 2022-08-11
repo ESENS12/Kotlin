@@ -7,7 +7,7 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:background="#fff"
-        android:id="@+id/parent"
+        android:id="@+id/cl_parent_view"
         android:focusable="true"
         android:clickable="true"
         android:minHeight="?attr/actionBarSize"
